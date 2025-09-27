@@ -15,18 +15,18 @@ struct Vertex
 // Assignment 1 object 1 -- white triangle (change these vertex colours from red to white)!!!
 static const Vertex vertices_white[3] =
 {
-    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {  0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-    { {   0.f,  0.6f }, { 1.0f, 0.0f, 0.0f } }
+    { { -0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {  0.6f, -0.4f }, { 1.0f, 1.0f, 1.0f } },
+    { {   0.f,  0.6f }, { 1.0f, 1.0f, 1.0f } }
 };
 
 // Assignment 1 object 2 -- rainbow triangle (done for you)
-//static const Vertex vertices_rainbow[3] =
-//{
-//    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
-//    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
-//    { {   0.f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
-//};
+static const Vertex vertices_rainbow[3] =
+{
+    { { -0.6f, -0.4f }, { 1.0f, 0.0f, 0.0f } },
+    { {  0.6f, -0.4f }, { 0.0f, 1.0f, 0.0f } },
+    { {   0.f,  0.6f }, { 0.0f, 0.0f, 1.0f } }
+};
 
 static const Vector2 vertex_positions[3] =
 {
@@ -95,6 +95,7 @@ int main()
 
     glBindVertexArray(GL_NONE);
 
+
     int object_index = 0;
 
     GLint u_color = glGetUniformLocation(a1_tri_shader, "u_color");
@@ -144,7 +145,7 @@ int main()
 
         case 1:
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.8, 0.8f, 0.8f);
+            glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
