@@ -104,7 +104,7 @@ int main()
     Matrix world = world = MatrixIdentity();
 
     // Generally you want to Scale * Rotate * Translate (order matters)!!!
-    world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);
+    /*world = MatrixRotateZ(30.0f * DEG2RAD) * MatrixTranslate(0.5f, 0.0f, 0.0f);*/
 
     /* Loop until the user closes the window */
     while (!WindowShouldClose())
@@ -132,7 +132,10 @@ int main()
 
         switch (object_index)
         {
-        case 0:
+        case 0: // White
+        {
+            world = MatrixTranslate(0, 0.0f, 0.0f);
+
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
 
@@ -142,8 +145,8 @@ int main()
             glBindVertexArray(vertex_array_white);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
-
-        case 1:
+        }
+		case 1: // Rainbow
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 1.0f, 1.0f, 1.0f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
@@ -151,29 +154,44 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
 
-        case 2:
+        case 2: // Time based Colour changing
+        {
+            float randomR = sinf(tt);
+			float randomG = sinf(tt);
+			float randomB = sinf(tt);
+
             glUseProgram(a1_tri_shader);
-            glUniform3f(u_color, 0.6, 0.6f, 0.6f);
+            glUniform3f(u_color, randomR, randomG, randomB);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
+        }
 
-        case 3:
+        case 3: // Back and forth (-x to +x)
+        {
+            float xTranslation = sinf(tt);
+            world = MatrixTranslate(xTranslation, 0.0f, 0.0f);
+
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.4, 0.4f, 0.4f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
+        }
 
-        case 4:
+        case 4: // Rotates counter clockwise on z axis
+        {
+            world = MatrixRotateZ((tt * 90) * DEG2RAD);
+
             glUseProgram(a1_tri_shader);
             glUniform3f(u_color, 0.5, 0.5f, 0.5f);
             glUniformMatrix4fv(u_world, 1, GL_FALSE, MatrixToFloat(world));
             glBindVertexArray(vertex_array_rainbow);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             break;
+        }
         }
 
         // Called at end of the frame to swap buffers and update input
