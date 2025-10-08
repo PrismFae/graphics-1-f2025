@@ -5,6 +5,8 @@
 #include <sstream>
 #include <cassert>
 
+static GLuint f_shader = GL_NONE;
+
 GLuint CreateShader(GLint type, const char* path)
 {
     GLuint shader = 0;
@@ -79,4 +81,24 @@ GLuint CreateProgram(GLuint vs, GLuint fs)
     }
 
     return program;
+}
+
+void BeginShader(GLuint shader)
+{
+    assert(f_shader == GL_NONE);
+    glUseProgram(shader);
+    f_shader = shader;
+}
+
+void EndShader()
+{
+    assert(f_shader != GL_NONE);
+    glUseProgram(GL_NONE);
+    f_shader = GL_NONE;
+}
+
+void SendVec3(Vector3 value, const char* name)
+{
+    GLint location = glGetUniformLocation(f_shader, name);
+    glUniform3f(location, value.x, value.y, value.z);
 }

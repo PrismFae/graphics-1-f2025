@@ -72,7 +72,6 @@ int main()
     glBindVertexArray(GL_NONE);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 
-    GLint u_color = glGetUniformLocation(a2_lines_shader, "u_color");
     GLint u_mvp = glGetUniformLocation(a2_lines_shader, "u_mvp");
 
     while (!WindowShouldClose())
@@ -89,13 +88,16 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(a2_lines_shader);
-        glBindVertexArray(vao_line);
         glLineWidth(5.0f);
+        glBindVertexArray(vao_line);
 
-        glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
-        glUniform3f(u_color, 1.0f, 0.0f, 0.0f);
-        glDrawArrays(GL_LINES, 0, line_vertex_count);
+        BeginShader(a2_lines_shader);
+
+            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
+            SendVec3(Vector3UnitX, "u_color");
+            glDrawArrays(GL_LINES, 0, line_vertex_count);
+
+        EndShader();
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
