@@ -72,8 +72,6 @@ int main()
     glBindVertexArray(GL_NONE);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 
-    GLint u_mvp = glGetUniformLocation(a2_lines_shader, "u_mvp");
-
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -92,11 +90,11 @@ int main()
         glBindVertexArray(vao_line);
 
         BeginShader(a2_lines_shader);
-
-            glUniformMatrix4fv(u_mvp, 1, GL_FALSE, MatrixToFloat(mvp));
+        {
+            SendMat4(mvp, "u_mvp");
             SendVec3(Vector3UnitX, "u_color");
             glDrawArrays(GL_LINES, 0, line_vertex_count);
-
+        }
         EndShader();
 
         BeginGui();
