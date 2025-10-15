@@ -2,6 +2,9 @@
 #include <glad/glad.h>
 #include "raymath.h"
 
+GLuint GenVertexArray();
+GLuint GenVertexBuffer();
+
 void BindVertexBuffer(GLuint vbo);
 void UnbindVertexBuffer();
 

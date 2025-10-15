@@ -52,14 +52,12 @@ int main()
     GLuint a2_lines_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a2_lines.frag");
     GLuint a2_lines_shader = CreateProgram(a2_lines_vert, a2_lines_frag);
 
-    GLuint vbo_line_positions;
-    glGenBuffers(1, &vbo_line_positions);
+    GLuint vbo_line_positions = GenVertexBuffer();
     BindVertexBuffer(vbo_line_positions);
         glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions), line_vertex_positions, GL_STATIC_DRAW);
     UnbindVertexBuffer();
 
-    GLuint vao_line;
-    glGenVertexArrays(1, &vao_line);
+    GLuint vao_line = GenVertexArray();
     BindVertexArray(vao_line);
 
     EnableVertexAttribute(0);

@@ -1,5 +1,19 @@
 #include "Buffer.h"
 
+GLuint GenVertexArray()
+{
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	return vao;
+}
+
+GLuint GenVertexBuffer()
+{
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	return vbo;
+}
+
 void BindVertexBuffer(GLuint vbo)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
