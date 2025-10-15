@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Shader.h"
-#include "raymath.h"
+#include "Buffer.h"
+
 #include <imgui/imgui.h>
 #include <cstddef>
 #include <cstdlib>
@@ -47,37 +48,33 @@ int main()
 
     CreateWindow(800, 800, "Graphics 1");
     
-    // Hint: The a1_triangle shaders handle vertex position AND vertex colour.
-    // Vertex colour is needed in order to receive full marks on this assignment!
     GLuint a2_lines_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a2_lines.vert");
     GLuint a2_lines_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a2_lines.frag");
     GLuint a2_lines_shader = CreateProgram(a2_lines_vert, a2_lines_frag);
 
     GLuint vbo_line_positions;
     glGenBuffers(1, &vbo_line_positions);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_line_positions);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions), line_vertex_positions, GL_STATIC_DRAW);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions2), line_vertex_positions2, GL_STATIC_DRAW);
-    // Comment/uncomment to see 1st square vs 2nd square.
-    // Your job is to automate the generation of squares so all 8 squares are rendered at once!
+    BindVertexBuffer(vbo_line_positions);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_line_positions);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions), line_vertex_positions, GL_STATIC_DRAW);
+    UnbindVertexBuffer();
 
     GLuint vao_line;
     glGenVertexArrays(1, &vao_line);
-    glBindVertexArray(vao_line);
+    BindVertexArray(vao_line);
 
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_line_positions);
+    BindVertexBuffer(vbo_line_positions);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), 0);
 
-    glBindVertexArray(GL_NONE);
-    glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
+    UnbindVertexArray();
+    UnbindVertexBuffer();
 
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
             SetWindowShouldClose(true);
 
-        // Note: change MatrixOrtho's left/right/bottom/top values to modify the extents of your screen!
         Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
         Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
         Matrix world = MatrixIdentity();
@@ -87,8 +84,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glLineWidth(5.0f);
-        glBindVertexArray(vao_line);
-
+        BindVertexArray(vao_line);
         BeginShader(a2_lines_shader);
         {
             SendMat4(mvp, "u_mvp");
@@ -96,6 +92,8 @@ int main()
             glDrawArrays(GL_LINES, 0, line_vertex_count);
         }
         EndShader();
+        UnbindVertexArray();
+        glLineWidth(1.0f);
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);

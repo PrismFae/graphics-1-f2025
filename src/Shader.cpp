@@ -150,7 +150,7 @@ void SendMat4(Matrix value, const char* name)
 
 int GetUniformLocation(GLuint shader, const char* name)
 {
-    GLint location = glGetUniformLocation(f_shader, name);
+    GLint location = glGetUniformLocation(shader, name);
     if (location == -1)
     {
         printf("Warning: shader %i failed to send uniform %s\n", shader, name);
