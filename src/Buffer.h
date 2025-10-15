@@ -7,3 +7,6 @@ void UnbindVertexBuffer();
 
 void BindVertexArray(GLuint vao);
 void UnbindVertexArray();
+
+void EnableVertexAttribute(GLuint index);
+void DisableVertexAttribute(GLuint index);

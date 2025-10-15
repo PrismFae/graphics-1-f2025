@@ -19,3 +19,13 @@ void UnbindVertexArray()
 {
 	glBindVertexArray(GL_NONE);
 }
+
+void EnableVertexAttribute(GLuint index)
+{
+	glEnableVertexAttribArray(index);
+}
+
+void DisableVertexAttribute(GLuint index)
+{
+	glDisableVertexAttribArray(index);
+}
