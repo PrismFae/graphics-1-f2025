@@ -29,3 +29,9 @@ void DisableVertexAttribute(GLuint index)
 {
 	glDisableVertexAttribArray(index);
 }
+
+void SetVertexAttribute(GLuint index, GLint compSize, GLenum type, GLsizei stride/*, int offset*/)
+{
+	// No interleaved vertex data in order to simplify our interface (offset is always nullptr)
+	glVertexAttribPointer(index, compSize, type, GL_FALSE, stride, nullptr);
+}

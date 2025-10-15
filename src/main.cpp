@@ -64,7 +64,7 @@ int main()
 
     EnableVertexAttribute(0);
     BindVertexBuffer(vbo_line_positions);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), 0);
+    SetVertexAttribute(0, 2, GL_FLOAT, sizeof(Vector2));
 
     UnbindVertexArray();
     UnbindVertexBuffer();
