@@ -54,7 +54,7 @@ int main()
 
     GLuint vbo_line_positions = GenVertexBuffer();
     BindVertexBuffer(vbo_line_positions);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertex_positions), line_vertex_positions, GL_STATIC_DRAW);
+        UpdateVertexBuffer(vbo_line_positions, (void*)line_vertex_positions, sizeof(line_vertex_positions));
     UnbindVertexBuffer();
 
     GLuint vao_line = GenVertexArray();
