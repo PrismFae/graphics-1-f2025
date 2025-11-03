@@ -49,8 +49,11 @@ int main()
     BindVertexBuffer(vbo_plane_positions);
     SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
+
     UnbindVertexArray();
     UnbindVertexBuffer();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
 
     while (!WindowShouldClose())
     {
@@ -70,12 +73,8 @@ int main()
         BeginShader(position_color);
         {
             SendMat4(mvp, "u_mvp");
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-
-            //glDrawArrays(GL_TRIANGLES, 0, 6);
-            //glDrawElements()
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);  // <-- samples 4 vertices using 6 indices
+            //glDrawArrays(GL_TRIANGLES, 0, 6);                         // <-- requires 6 vertices (not optimal)
         }
         EndShader();
         UnbindVertexArray();
