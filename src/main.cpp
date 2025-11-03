@@ -31,7 +31,7 @@ int main()
     GLuint position_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/position_color.frag");
     GLuint position_color = CreateProgram(position_color_vert, position_color_frag);
 
-    GLuint vbo_plane_positions = GenVertexBuffer();
+    GLuint vbo_plane_positions = CreateVertexBuffer();
     BindVertexBuffer(vbo_plane_positions);
         UpdateVertexBuffer(vbo_plane_positions, (void*)plane_vertex_positions, sizeof(plane_vertex_positions));
     UnbindVertexBuffer();
@@ -42,7 +42,7 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(plane_vertex_indices), plane_vertex_indices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
 
-    GLuint vao_plane = GenVertexArray();
+    GLuint vao_plane = CreateVertexArray();
     BindVertexArray(vao_plane);
 
     EnableVertexAttribute(0);
@@ -86,9 +86,10 @@ int main()
 
         Loop();
     }
-
-    glDeleteVertexArrays(1, &vao_plane);
-    glDeleteBuffers(1, &vbo_plane_positions);
+    
+    // TODO -- both vbo & ebo use gen/bufferdata/delete buffer so add an argument for buffer target?
+    DestroyVertexArray(&vao_plane);
+    DestroyVertexBuffer(&vbo_plane_positions);
     DestroyProgram(&position_color);
     DestroyShader(&position_color_vert);
     DestroyShader(&position_color_frag);

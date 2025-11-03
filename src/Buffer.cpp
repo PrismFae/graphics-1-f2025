@@ -4,18 +4,32 @@
 static GLuint f_vao = GL_NONE;
 static GLuint f_vbo = GL_NONE;
 
-GLuint GenVertexArray()
+GLuint CreateVertexArray()
 {
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	return vao;
 }
 
-GLuint GenVertexBuffer()
+GLuint CreateVertexBuffer()
 {
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	return vbo;
+}
+
+void DestroyVertexArray(GLuint* vao)
+{
+	assert(f_vao == GL_NONE);
+	glDeleteVertexArrays(1, vao);
+	*vao = GL_NONE;
+}
+
+void DestroyVertexBuffer(GLuint* vbo)
+{
+	assert(f_vbo == GL_NONE);
+	glDeleteBuffers(1, vbo);
+	*vbo = GL_NONE;
 }
 
 void BindVertexBuffer(GLuint vbo)
