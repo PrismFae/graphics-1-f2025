@@ -7,62 +7,47 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
-
-// 4 lines in 1 square -- each line has 2 vertices, therefore 8 array elements because 4 lines * 2 vertices per line = 8
-// Hint: if 1 square is 8 vertices, and Assignment 2 requires you to render 8 squares, then 8 squares * 8 vertices per square = 64 vertices;
-// (Consider reserving 64 vertices worth of space if you'd like to fit all your positions in a single vertex array)
-
-static const int line_vertex_count = 8;
-static const Vector2 line_vertex_positions[line_vertex_count]
-{
-    { -1.0f,  -1.0f },   // bottom-left
-    {  1.0f,  -1.0f },   // bottom-right
-
-    {  1.0f, -1.0f },   // bottom-right
-    {  1.0f,  1.0f },   // top-right
-
-    {   1.0f,  1.0f },   // top-right
-    {  -1.0f,  1.0f },   // top-left
-
-    { -1.0f,   1.0f },   // top-left
-    { -1.0f,  -1.0f }    // bottom-left
-};
-
+ 
 int main()
 {
-    // How to form the vertices for the 2nd square:
-    Vector2 line_vertex_positions2[8];
+    // CCW winding order
+    Vector3 plane_vertex_positions[] =
+    {
+        { -0.5f, -0.5f, 0.0f }, // bottom-left
+        {  0.5f, -0.5f, 0.0f }, // bottom-right
+        {  0.5f,  0.5f, 0.0f }, // top-right
+        {  -0.5f, 0.5f, 0.0f }  // top-left
+    };
 
-    line_vertex_positions2[0] = Vector2Lerp(line_vertex_positions[0], line_vertex_positions[1], 0.5f);
-    line_vertex_positions2[1] = Vector2Lerp(line_vertex_positions[2], line_vertex_positions[3], 0.5f);
-
-    line_vertex_positions2[2] = Vector2Lerp(line_vertex_positions[2], line_vertex_positions[3], 0.5f);
-    line_vertex_positions2[3] = Vector2Lerp(line_vertex_positions[4], line_vertex_positions[5], 0.5f);
-
-    line_vertex_positions2[4] = Vector2Lerp(line_vertex_positions[4], line_vertex_positions[5], 0.5f);
-    line_vertex_positions2[5] = Vector2Lerp(line_vertex_positions[6], line_vertex_positions[7], 0.5f);
-    
-    line_vertex_positions2[6] = Vector2Lerp(line_vertex_positions[6], line_vertex_positions[7], 0.5f);
-    line_vertex_positions2[7] = Vector2Lerp(line_vertex_positions[0], line_vertex_positions[1], 0.5f);
-    // (For full marks, you need to automate this with loops or recursion for 8 iterations [meaning 8 squares])
+    int plane_vertex_indices[] =
+    {
+        0, 1, 2,    // Face 0 indices
+        0, 2, 3     // Face 1 indices
+    };
 
     CreateWindow(800, 800, "Graphics 1");
     
-    GLuint a2_lines_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a2_lines.vert");
-    GLuint a2_lines_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a2_lines.frag");
-    GLuint a2_lines_shader = CreateProgram(a2_lines_vert, a2_lines_frag);
+    GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
+    GLuint position_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/position_color.frag");
+    GLuint position_color = CreateProgram(position_color_vert, position_color_frag);
 
-    GLuint vbo_line_positions = GenVertexBuffer();
-    BindVertexBuffer(vbo_line_positions);
-        UpdateVertexBuffer(vbo_line_positions, (void*)line_vertex_positions, sizeof(line_vertex_positions));
+    GLuint vbo_plane_positions = GenVertexBuffer();
+    BindVertexBuffer(vbo_plane_positions);
+        UpdateVertexBuffer(vbo_plane_positions, (void*)plane_vertex_positions, sizeof(plane_vertex_positions));
     UnbindVertexBuffer();
 
-    GLuint vao_line = GenVertexArray();
-    BindVertexArray(vao_line);
+    GLuint ebo_plane;
+    glGenBuffers(1, &ebo_plane);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(plane_vertex_indices), plane_vertex_indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+
+    GLuint vao_plane = GenVertexArray();
+    BindVertexArray(vao_plane);
 
     EnableVertexAttribute(0);
-    BindVertexBuffer(vbo_line_positions);
-    SetVertexAttribute(0, 2, GL_FLOAT, sizeof(Vector2));
+    BindVertexBuffer(vbo_plane_positions);
+    SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
 
     UnbindVertexArray();
     UnbindVertexBuffer();
@@ -81,12 +66,16 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glLineWidth(5.0f);
-        BindVertexArray(vao_line);
-        BeginShader(a2_lines_shader);
+        BindVertexArray(vao_plane);
+        BeginShader(position_color);
         {
             SendMat4(mvp, "u_mvp");
-            SendVec3(Vector3UnitX, "u_color");
-            glDrawArrays(GL_LINES, 0, line_vertex_count);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+
+            //glDrawArrays(GL_TRIANGLES, 0, 6);
+            //glDrawElements()
         }
         EndShader();
         UnbindVertexArray();
@@ -99,11 +88,11 @@ int main()
         Loop();
     }
 
-    glDeleteVertexArrays(1, &vao_line);
-    glDeleteBuffers(1, &vbo_line_positions);
-    glDeleteProgram(a2_lines_shader);
-    glDeleteShader(a2_lines_frag);
-    glDeleteShader(a2_lines_vert);
+    glDeleteVertexArrays(1, &vao_plane);
+    glDeleteBuffers(1, &vbo_plane_positions);
+    DestroyProgram(&position_color);
+    DestroyShader(&position_color_vert);
+    DestroyShader(&position_color_frag);
 
     DestroyWindow();
     return 0;
