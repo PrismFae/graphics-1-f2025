@@ -33,7 +33,7 @@ int main()
 
     GLuint vbo_plane_positions = CreateBuffer();
     BindVertexBuffer(vbo_plane_positions);
-        UpdateVertexBuffer((void*)plane_vertex_positions, sizeof(plane_vertex_positions));
+        UpdateVertexBuffer(plane_vertex_positions, sizeof(plane_vertex_positions));
     UnbindVertexBuffer(vbo_plane_positions);
 
     GLuint ebo_plane = CreateBuffer();
@@ -49,10 +49,9 @@ int main()
         BindVertexBuffer(vbo_plane_positions);
         EnableVertexAttribute(0);
         SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
+        UnbindVertexBuffer(vbo_plane_positions);
 
     UnbindVertexArray(vao_plane);
-    UnbindVertexBuffer(vbo_plane_positions);
-    UnbindElementBuffer(ebo_plane);
 
     while (!WindowShouldClose())
     {
@@ -67,7 +66,6 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glLineWidth(5.0f);
         BindVertexArray(vao_plane);
             BeginShader(position_color);
                 SendMat4(mvp, "u_mvp");
@@ -75,7 +73,6 @@ int main()
                 //glDrawArrays(GL_TRIANGLES, 0, 6);                         // <-- requires 6 vertices (not optimal)
             EndShader();
         UnbindVertexArray(vao_plane);
-        glLineWidth(1.0f);
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
@@ -84,13 +81,13 @@ int main()
         Loop();
     }
     
-    // TODO -- both vbo & ebo use gen/bufferdata/delete buffer so add an argument for buffer target?
     DestroyVertexArray(&vao_plane);
-    DestroyBuffer(&vbo_plane_positions);
     DestroyBuffer(&ebo_plane);
-    DestroyProgram(&position_color);
+    DestroyBuffer(&vbo_plane_positions);
+
     DestroyShader(&position_color_vert);
     DestroyShader(&position_color_frag);
+    DestroyProgram(&position_color);
 
     DestroyWindow();
     return 0;
