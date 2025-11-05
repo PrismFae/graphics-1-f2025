@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
- 
+
 int main()
 {
     // CCW winding order
