@@ -19,6 +19,22 @@ int main()
         {  -0.5f, 0.5f, 0.0f }  // top-left
     };
 
+    Vector2 plane_vertex_tcoords[] =
+    {
+        { 0.0f, 0.0f },
+        { 1.0f, 0.0f },
+        { 1.0f, 1.0f },
+        { 0.0f, 1.0f }
+    };
+
+    Vector3 plane_vertex_normals[] =
+    {
+        Vector3UnitZ,
+        Vector3UnitZ,
+        Vector3UnitZ,
+        Vector3UnitZ
+    };
+
     int plane_vertex_indices[] =
     {
         0, 1, 2,    // Face 0 indices
@@ -27,14 +43,24 @@ int main()
 
     CreateWindow(800, 800, "Graphics 1");
     
-    GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
-    GLuint position_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/position_color.frag");
+    GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
+    GLuint position_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/vertex_color.frag");
     GLuint position_color = CreateProgram(position_color_vert, position_color_frag);
 
     GLuint vbo_plane_positions = CreateBuffer();
     BindVertexBuffer(vbo_plane_positions);
         UpdateVertexBuffer(plane_vertex_positions, sizeof(plane_vertex_positions));
     UnbindVertexBuffer(vbo_plane_positions);
+
+    GLuint vbo_plane_tcoords = CreateBuffer();
+    BindVertexBuffer(vbo_plane_tcoords);
+        UpdateVertexBuffer(plane_vertex_tcoords, sizeof(plane_vertex_tcoords));
+    UnbindVertexBuffer(vbo_plane_tcoords);
+
+    GLuint vbo_plane_normals = CreateBuffer();
+    BindVertexBuffer(vbo_plane_normals);
+        UpdateVertexBuffer(plane_vertex_normals, sizeof(plane_vertex_normals));
+    UnbindVertexBuffer(vbo_plane_normals);
 
     GLuint ebo_plane = CreateBuffer();
     BindElementBuffer(ebo_plane);
@@ -46,10 +72,21 @@ int main()
 
         BindElementBuffer(ebo_plane);
 
-        BindVertexBuffer(vbo_plane_positions);
         EnableVertexAttribute(0);
-        SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
+        EnableVertexAttribute(1);
+        EnableVertexAttribute(2);
+
+        BindVertexBuffer(vbo_plane_positions);
+            SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
         UnbindVertexBuffer(vbo_plane_positions);
+
+        BindVertexBuffer(vbo_plane_tcoords);
+            SetVertexAttribute(1, 2, GL_FLOAT, sizeof(Vector2));
+        UnbindVertexBuffer(vbo_plane_tcoords);
+
+        BindVertexBuffer(vbo_plane_normals);
+            SetVertexAttribute(2, 3, GL_FLOAT, sizeof(Vector3));
+        UnbindVertexBuffer(vbo_plane_normals);
 
     UnbindVertexArray(vao_plane);
 
