@@ -31,29 +31,28 @@ int main()
     GLuint position_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/position_color.frag");
     GLuint position_color = CreateProgram(position_color_vert, position_color_frag);
 
-    GLuint vbo_plane_positions = CreateVertexBuffer();
+    GLuint vbo_plane_positions = CreateBuffer();
     BindVertexBuffer(vbo_plane_positions);
-        UpdateVertexBuffer(vbo_plane_positions, (void*)plane_vertex_positions, sizeof(plane_vertex_positions));
-    UnbindVertexBuffer();
+        UpdateVertexBuffer((void*)plane_vertex_positions, sizeof(plane_vertex_positions));
+    UnbindVertexBuffer(vbo_plane_positions);
 
-    GLuint ebo_plane;
-    glGenBuffers(1, &ebo_plane);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(plane_vertex_indices), plane_vertex_indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+    GLuint ebo_plane = CreateBuffer();
+    BindElementBuffer(ebo_plane);
+        UpdateElementBuffer(plane_vertex_indices, sizeof(plane_vertex_indices));
+    UnbindElementBuffer(ebo_plane);
 
     GLuint vao_plane = CreateVertexArray();
     BindVertexArray(vao_plane);
 
-    EnableVertexAttribute(0);
-    BindVertexBuffer(vbo_plane_positions);
-    SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
+        BindElementBuffer(ebo_plane);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_plane);
+        BindVertexBuffer(vbo_plane_positions);
+        EnableVertexAttribute(0);
+        SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
 
-    UnbindVertexArray();
-    UnbindVertexBuffer();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
+    UnbindVertexArray(vao_plane);
+    UnbindVertexBuffer(vbo_plane_positions);
+    UnbindElementBuffer(ebo_plane);
 
     while (!WindowShouldClose())
     {
@@ -70,14 +69,12 @@ int main()
 
         glLineWidth(5.0f);
         BindVertexArray(vao_plane);
-        BeginShader(position_color);
-        {
-            SendMat4(mvp, "u_mvp");
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);  // <-- samples 4 vertices using 6 indices
-            //glDrawArrays(GL_TRIANGLES, 0, 6);                         // <-- requires 6 vertices (not optimal)
-        }
-        EndShader();
-        UnbindVertexArray();
+            BeginShader(position_color);
+                SendMat4(mvp, "u_mvp");
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);  // <-- samples 4 vertices using 6 indices
+                //glDrawArrays(GL_TRIANGLES, 0, 6);                         // <-- requires 6 vertices (not optimal)
+            EndShader();
+        UnbindVertexArray(vao_plane);
         glLineWidth(1.0f);
 
         BeginGui();
@@ -89,7 +86,8 @@ int main()
     
     // TODO -- both vbo & ebo use gen/bufferdata/delete buffer so add an argument for buffer target?
     DestroyVertexArray(&vao_plane);
-    DestroyVertexBuffer(&vbo_plane_positions);
+    DestroyBuffer(&vbo_plane_positions);
+    DestroyBuffer(&ebo_plane);
     DestroyProgram(&position_color);
     DestroyShader(&position_color_vert);
     DestroyShader(&position_color_frag);

@@ -3,19 +3,24 @@
 #include "raymath.h"
 
 GLuint CreateVertexArray();
-GLuint CreateVertexBuffer();
+GLuint CreateBuffer();
 
 void DestroyVertexArray(GLuint* vao);
-void DestroyVertexBuffer(GLuint* vbo);
-
-void BindVertexBuffer(GLuint vbo);
-void UnbindVertexBuffer();
+void DestroyBuffer(GLuint* vbo);
 
 void BindVertexArray(GLuint vao);
-void UnbindVertexArray();
+void UnbindVertexArray(GLuint vao);
+
+void BindVertexBuffer(GLuint vbo);
+void UnbindVertexBuffer(GLuint vbo);
+
+void BindElementBuffer(GLuint ebo);
+void UnbindElementBuffer(GLuint ebo);
 
 void EnableVertexAttribute(GLuint index);
 void DisableVertexAttribute(GLuint index);
 
 void SetVertexAttribute(GLuint index, GLint compSize, GLenum type, GLsizei stride);
-void UpdateVertexBuffer(GLuint vbo, void* data, int data_size);
+
+void UpdateVertexBuffer(void* data, int data_size);
+void UpdateElementBuffer(void* data, int data_size);
