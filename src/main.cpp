@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Shader.h"
 #include "Buffer.h"
+#include "Mesh.h"
 
 #include <imgui/imgui.h>
 #include <cstddef>
@@ -49,7 +50,11 @@ int main()
         0, 2, 3     // Face 1 indices
     };
 
+
     CreateWindow(800, 800, "Graphics 1");
+
+    Mesh head;
+    LoadMesh(&head, "./assets/meshes/head.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -153,6 +158,8 @@ int main()
     DestroyProgram(&position_color);
     DestroyProgram(&tcoord_color);
     DestroyProgram(&normal_color);
+
+    UnloadMesh(&head);
 
     DestroyWindow();
     return 0;
