@@ -108,7 +108,7 @@ int main()
 
     UnbindVertexArray(vao_plane);
 
-    int shader_index = 0;
+    int shader_index = 1;
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -117,8 +117,9 @@ int main()
         if (IsKeyPressed(KEY_GRAVE_ACCENT))
             ++shader_index %= SHADER_TYPE_COUNT;
 
-        Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
-        Matrix view = MatrixLookAt({ 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
+        //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
+        Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
+        Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
         Matrix world = MatrixIdentity();
         Matrix mvp = world * view * proj;
 
