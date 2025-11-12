@@ -10,6 +10,7 @@
 #include <fast_obj/fast_obj.h>
 
 void LoadMeshGPU(Mesh* mesh);
+void LoadMeshParPlatonic(Mesh* mesh, par_shapes_mesh* par);
 
 void LoadMesh(Mesh* mesh, const char* path)
 {
@@ -71,8 +72,48 @@ void LoadMeshPlane(Mesh* mesh)
 
 void LoadMeshSphere(Mesh* mesh)
 {
-    par_shapes_mesh* par = par_shapes_create_tetrahedron();
+    par_shapes_mesh* par = par_shapes_create_parametric_sphere(8, 8);
+    // Parametric surfaces contain texture coordinates and normals!
+    par_shapes_free_mesh(par);
+}
 
+void LoadMeshTetrahedron(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_tetrahedron();
+    LoadMeshParPlatonic(mesh, par);
+    LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
+}
+
+void LoadMeshCube(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_cube();
+    LoadMeshParPlatonic(mesh, par);
+    LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
+}
+
+void LoadMeshOctahedron(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_octahedron();
+    LoadMeshParPlatonic(mesh, par);
+    LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
+}
+
+void LoadMeshDodecahedron(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_dodecahedron();
+    LoadMeshParPlatonic(mesh, par);
+    LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
+}
+
+void LoadMeshIcosahedron(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_icosahedron();
+    LoadMeshParPlatonic(mesh, par);
+    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
 
@@ -80,7 +121,7 @@ void DrawMesh(const Mesh& mesh)
 {
     BindVertexArray(mesh.vao);
     if (mesh.ibo != GL_NONE)
-        glDrawElements(GL_TRIANGLES, mesh.vertex_count, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, mesh.vertex_count, GL_UNSIGNED_SHORT, nullptr);
     else
         glDrawArrays(GL_TRIANGLES, 0, mesh.vertex_count);
     UnbindVertexArray(mesh.vao);
@@ -117,20 +158,16 @@ void LoadMeshGPU(Mesh* mesh)
     if (!mesh->indices.empty())
     {
         mesh->ibo = CreateBuffer();
-        BindElementBuffer(mesh->ibo);
-        UpdateElementBuffer(mesh->indices.data(), mesh->indices.size() * sizeof(unsigned int));
-        UnbindElementBuffer(mesh->ibo);
+        BindIndexBuffer(mesh->ibo);
+            UpdateElementBuffer(mesh->indices.data(), mesh->indices.size() * sizeof(uint16_t));
+        UnbindIndexBuffer(mesh->ibo);
     }
     else
         printf("Warning: mesh loaded without index buffer\n");
 
     mesh->vao = CreateVertexArray();
     BindVertexArray(mesh->vao);
-
-    if (mesh->ibo != GL_NONE)
-    {
-        BindElementBuffer(mesh->ibo);
-    }
+    BindIndexBuffer(mesh->ibo);
 
     EnableVertexAttribute(0);
     EnableVertexAttribute(1);
@@ -156,4 +193,23 @@ void LoadMeshGPU(Mesh* mesh)
     }
 
     UnbindVertexArray(mesh->vao);
+    UnbindIndexBuffer(mesh->ibo);
+}
+
+void LoadMeshParPlatonic(Mesh* mesh, par_shapes_mesh* par)
+{
+    // Platonic solids only contain positions initially
+    // ntriangles * 3 = vertex_count (amount of elements in index buffer)
+    par_shapes_compute_normals(par);
+
+    mesh->vertex_count = par->ntriangles * 3;
+    mesh->indices.resize(mesh->vertex_count);
+    mesh->positions.resize(par->npoints);
+    mesh->normals.resize(par->npoints);
+
+    Vector3* par_positions = reinterpret_cast<Vector3*>(par->points);
+    Vector3* par_normals = reinterpret_cast<Vector3*>(par->normals);
+    memcpy(mesh->positions.data(), par_positions, par->npoints * sizeof(Vector3));
+    memcpy(mesh->normals.data(), par_normals, par->npoints * sizeof(Vector3));
+    memcpy(mesh->indices.data(), par->triangles, mesh->vertex_count * sizeof(PAR_SHAPES_T));
 }

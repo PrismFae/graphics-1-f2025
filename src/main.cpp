@@ -16,13 +16,31 @@ enum ShaderType
     SHADER_TYPE_COUNT
 };
 
+enum MeshType
+{
+    MESH_TETRAHEDRON,
+    MESH_CUBE,
+    MESH_OCTAHEDRON,
+    MESH_DODECAHEDRON,
+    MESH_ICOSAHEDRON,
+    MESH_TYPE_COUNT
+};
+
 int main()
 {
     CreateWindow(800, 800, "Graphics 1");
 
-    Mesh head, plane;
+    Mesh head, plane, sphere;
     LoadMesh(&head, "./assets/meshes/head.obj");
     LoadMeshPlane(&plane);
+    LoadMeshSphere(&sphere);
+
+    Mesh solids[MESH_TYPE_COUNT];
+    LoadMeshTetrahedron(&solids[MESH_TETRAHEDRON]);
+    LoadMeshCube(&solids[MESH_CUBE]);
+    LoadMeshOctahedron(&solids[MESH_OCTAHEDRON]);
+    LoadMeshDodecahedron(&solids[MESH_DODECAHEDRON]);
+    LoadMeshIcosahedron(&solids[MESH_ICOSAHEDRON]);
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -38,7 +56,8 @@ int main()
     shaders[SHADER_TCOORD_COLOR] = tcoord_color;
     shaders[SHADER_NORMAL_COLOR] = normal_color;
 
-    int shader_index = 1;
+    int shader_index = 0;
+    int mesh_index = 0;
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -47,10 +66,15 @@ int main()
         if (IsKeyPressed(KEY_GRAVE_ACCENT))
             ++shader_index %= SHADER_TYPE_COUNT;
 
+        if (IsKeyPressed(KEY_TAB))
+            ++mesh_index %= MESH_TYPE_COUNT;
+
+        float tt = Time();
+
         //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
         Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
-        Matrix world = MatrixIdentity();
+        Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD); //MatrixIdentity();
         Matrix mvp = world * view * proj;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -58,7 +82,7 @@ int main()
 
         BeginShader(shaders[shader_index]);
             SendMat4(mvp, "u_mvp");
-            DrawMesh(plane);
+            DrawMesh(solids[mesh_index]);
         EndShader();
 
         BeginGui();
@@ -77,6 +101,10 @@ int main()
     DestroyProgram(&tcoord_color);
     DestroyProgram(&normal_color);
 
+    for (int i = 0; i < MESH_TYPE_COUNT; i++)
+        UnloadMesh(&solids[i]);
+
+    UnloadMesh(&sphere);
     UnloadMesh(&plane);
     UnloadMesh(&head);
 

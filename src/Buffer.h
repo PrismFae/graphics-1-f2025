@@ -14,8 +14,8 @@ void UnbindVertexArray(GLuint vao);
 void BindVertexBuffer(GLuint vbo);
 void UnbindVertexBuffer(GLuint vbo);
 
-void BindElementBuffer(GLuint ebo);
-void UnbindElementBuffer(GLuint ebo);
+void BindIndexBuffer(GLuint ebo);
+void UnbindIndexBuffer(GLuint ebo);
 
 void EnableVertexAttribute(GLuint index);
 void DisableVertexAttribute(GLuint index);

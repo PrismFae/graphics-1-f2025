@@ -3,7 +3,7 @@
 
 static GLuint f_vao = GL_NONE;
 static GLuint f_vbo = GL_NONE;
-static GLuint f_ebo = GL_NONE;
+static GLuint f_ibo = GL_NONE;
 
 GLuint CreateVertexArray()
 {
@@ -59,18 +59,18 @@ void UnbindVertexBuffer(GLuint vbo)
 	f_vbo = GL_NONE;
 }
 
-void BindElementBuffer(GLuint ebo)
+void BindIndexBuffer(GLuint ebo)
 {
-	assert(f_ebo == GL_NONE);
+	assert(f_ibo == GL_NONE);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	f_ebo = ebo;
+	f_ibo = ebo;
 }
 
-void UnbindElementBuffer(GLuint ebo)
+void UnbindIndexBuffer(GLuint ebo)
 {
-	assert(ebo == f_ebo && f_ebo != GL_NONE);
+	assert(ebo == f_ibo && f_ibo != GL_NONE);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_NONE);
-	f_ebo = GL_NONE;
+	f_ibo = GL_NONE;
 }
 
 void EnableVertexAttribute(GLuint index)
@@ -97,6 +97,6 @@ void UpdateVertexBuffer(void* data, int data_size)
 
 void UpdateElementBuffer(void* data, int data_size)
 {
-	assert(f_ebo != GL_NONE);
+	assert(f_ibo != GL_NONE);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
 }
