@@ -3,10 +3,6 @@
 #include <vector>
 #include "raymath.h"
 
-// Extra practice 1:
-// Transform the plane within main.cpp's position/tcoord/normal data into this Mesh structure.
-// Add the corresponding vertex buffers to this Mesh structure so it has everything to store a mesh on both the CPU and GPU!
-
 // Extra practice 2:
 // Have a look at the fastObjMesh data-type.
 // See if you can transform the data loaded into fastObjMesh to the data the GPU expects!
@@ -15,7 +11,20 @@ struct Mesh
 	std::vector<Vector3> positions;
 	std::vector<Vector2> tcoords;
 	std::vector<Vector3> normals;
+	std::vector<unsigned int> indices;
+
+	GLuint pbo = GL_NONE;	// positions buffer
+	GLuint tbo = GL_NONE;	// tcoords buffer
+	GLuint nbo = GL_NONE;	// normals buffer
+	GLuint ibo = GL_NONE;	// index buffer
+
+	GLuint vao = GL_NONE;
+	int vertex_count = -1;
 };
 
 void LoadMesh(Mesh* mesh, const char* path);
 void UnloadMesh(Mesh* mesh);
+
+void LoadMeshPlane(Mesh* mesh);
+
+void DrawMesh(const Mesh& mesh);
