@@ -26,5 +26,6 @@ void LoadMesh(Mesh* mesh, const char* path);
 void UnloadMesh(Mesh* mesh);
 
 void LoadMeshPlane(Mesh* mesh);
+void LoadMeshSphere(Mesh* mesh);
 
 void DrawMesh(const Mesh& mesh);

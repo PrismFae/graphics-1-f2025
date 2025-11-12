@@ -1,8 +1,15 @@
 #include "Mesh.h"
 #include "Buffer.h"
+#include <cstdio>
+#include <cassert>
+
+#define PAR_SHAPES_IMPLEMENTATION
+#include <par_shapes/par_shapes.h>
 
 #define FAST_OBJ_IMPLEMENTATION
 #include <fast_obj/fast_obj.h>
+
+void LoadMeshGPU(Mesh* mesh);
 
 void LoadMesh(Mesh* mesh, const char* path)
 {
@@ -59,48 +66,14 @@ void LoadMeshPlane(Mesh* mesh)
     mesh->indices[4] = 2;
     mesh->indices[5] = 3;
 
-    mesh->pbo = CreateBuffer();
-    BindVertexBuffer(mesh->pbo);
-        UpdateVertexBuffer(mesh->positions.data(), mesh->positions.size() * sizeof(Vector3));
-    UnbindVertexBuffer(mesh->pbo);
+    LoadMeshGPU(mesh);
+}
 
-    mesh->tbo = CreateBuffer();
-    BindVertexBuffer(mesh->tbo);
-        UpdateVertexBuffer(mesh->tcoords.data(), mesh->tcoords.size() * sizeof(Vector2));
-    UnbindVertexBuffer(mesh->tbo);
+void LoadMeshSphere(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_tetrahedron();
 
-    mesh->nbo = CreateBuffer();
-    BindVertexBuffer(mesh->nbo);
-        UpdateVertexBuffer(mesh->normals.data(), mesh->normals.size() * sizeof(Vector3));
-    UnbindVertexBuffer(mesh->nbo);
-
-    mesh->ibo = CreateBuffer();
-    BindElementBuffer(mesh->ibo);
-        UpdateElementBuffer(mesh->indices.data(), mesh->indices.size() * sizeof(unsigned int));
-    UnbindElementBuffer(mesh->ibo);
-
-    mesh->vao = CreateVertexArray();
-    BindVertexArray(mesh->vao);
-
-    BindElementBuffer(mesh->ibo);
-
-    EnableVertexAttribute(0);
-    EnableVertexAttribute(1);
-    EnableVertexAttribute(2);
-
-    BindVertexBuffer(mesh->pbo);
-        SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
-    UnbindVertexBuffer(mesh->pbo);
-
-    BindVertexBuffer(mesh->tbo);
-        SetVertexAttribute(1, 2, GL_FLOAT, sizeof(Vector2));
-    UnbindVertexBuffer(mesh->tbo);
-
-    BindVertexBuffer(mesh->nbo);
-        SetVertexAttribute(2, 3, GL_FLOAT, sizeof(Vector3));
-    UnbindVertexBuffer(mesh->nbo);
-
-    UnbindVertexArray(mesh->vao);
+    par_shapes_free_mesh(par);
 }
 
 void DrawMesh(const Mesh& mesh)
@@ -111,4 +84,76 @@ void DrawMesh(const Mesh& mesh)
     else
         glDrawArrays(GL_TRIANGLES, 0, mesh.vertex_count);
     UnbindVertexArray(mesh.vao);
+}
+
+void LoadMeshGPU(Mesh* mesh)
+{
+    assert(!mesh->positions.empty());
+    mesh->pbo = CreateBuffer();
+    BindVertexBuffer(mesh->pbo);
+    UpdateVertexBuffer(mesh->positions.data(), mesh->positions.size() * sizeof(Vector3));
+    UnbindVertexBuffer(mesh->pbo);
+
+    if (!mesh->tcoords.empty())
+    {
+        mesh->tbo = CreateBuffer();
+        BindVertexBuffer(mesh->tbo);
+        UpdateVertexBuffer(mesh->tcoords.data(), mesh->tcoords.size() * sizeof(Vector2));
+        UnbindVertexBuffer(mesh->tbo);
+    }
+    else
+        printf("Warning: mesh loaded without texture coordinates\n");
+
+    if (!mesh->normals.empty())
+    {
+        mesh->nbo = CreateBuffer();
+        BindVertexBuffer(mesh->nbo);
+        UpdateVertexBuffer(mesh->normals.data(), mesh->normals.size() * sizeof(Vector3));
+        UnbindVertexBuffer(mesh->nbo);
+    }
+    else
+        printf("Warning: mesh loaded without normals\n");
+
+    if (!mesh->indices.empty())
+    {
+        mesh->ibo = CreateBuffer();
+        BindElementBuffer(mesh->ibo);
+        UpdateElementBuffer(mesh->indices.data(), mesh->indices.size() * sizeof(unsigned int));
+        UnbindElementBuffer(mesh->ibo);
+    }
+    else
+        printf("Warning: mesh loaded without index buffer\n");
+
+    mesh->vao = CreateVertexArray();
+    BindVertexArray(mesh->vao);
+
+    if (mesh->ibo != GL_NONE)
+    {
+        BindElementBuffer(mesh->ibo);
+    }
+
+    EnableVertexAttribute(0);
+    EnableVertexAttribute(1);
+    EnableVertexAttribute(2);
+
+    assert(mesh->pbo != GL_NONE);
+    BindVertexBuffer(mesh->pbo);
+    SetVertexAttribute(0, 3, GL_FLOAT, sizeof(Vector3));
+    UnbindVertexBuffer(mesh->pbo);
+
+    if (mesh->tbo != GL_NONE)
+    {
+        BindVertexBuffer(mesh->tbo);
+        SetVertexAttribute(1, 2, GL_FLOAT, sizeof(Vector2));
+        UnbindVertexBuffer(mesh->tbo);
+    }
+   
+    if (mesh->nbo != GL_NONE)
+    {
+        BindVertexBuffer(mesh->nbo);
+        SetVertexAttribute(2, 3, GL_FLOAT, sizeof(Vector3));
+        UnbindVertexBuffer(mesh->nbo);
+    }
+
+    UnbindVertexArray(mesh->vao);
 }
