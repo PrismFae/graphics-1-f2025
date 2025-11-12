@@ -66,7 +66,7 @@ void LoadMeshPlane(Mesh* mesh)
 
     mesh->tbo = CreateBuffer();
     BindVertexBuffer(mesh->tbo);
-    UpdateVertexBuffer(mesh->tcoords.data(), mesh->tcoords.size() * sizeof(Vector2));
+        UpdateVertexBuffer(mesh->tcoords.data(), mesh->tcoords.size() * sizeof(Vector2));
     UnbindVertexBuffer(mesh->tbo);
 
     mesh->nbo = CreateBuffer();
@@ -106,6 +106,9 @@ void LoadMeshPlane(Mesh* mesh)
 void DrawMesh(const Mesh& mesh)
 {
     BindVertexArray(mesh.vao);
+    if (mesh.ibo != GL_NONE)
         glDrawElements(GL_TRIANGLES, mesh.vertex_count, GL_UNSIGNED_INT, nullptr);
+    else
+        glDrawArrays(GL_TRIANGLES, 0, mesh.vertex_count);
     UnbindVertexArray(mesh.vao);
 }
