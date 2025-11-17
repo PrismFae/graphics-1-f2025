@@ -13,12 +13,14 @@ void LoadMeshGPU(Mesh* mesh);
 void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par);
 void LoadMeshPlaneManual(Mesh* mesh);
 
-void LoadMesh(Mesh* mesh, const char* path)
+void LoadMeshObj(Mesh* mesh, const char* path)
 {
 	fastObjMesh* obj = fast_obj_read(path);
 
 	// LoadMesh transforms an internal fastObjMesh into our renderer's unified Mesh type
 	fast_obj_destroy(obj);
+
+
 }
 
 void UnloadMesh(Mesh* mesh)
@@ -39,69 +41,75 @@ void UnloadMesh(Mesh* mesh)
 
 void LoadMeshPlane(Mesh* mesh)
 {
-    //LoadMeshPlaneManual(mesh);
-    //LoadMeshGPU(mesh);
-
     par_shapes_mesh* par = par_shapes_create_plane(1, 1);
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    //LoadMeshPlaneManual(mesh);
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshSphere(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_parametric_sphere(8, 8);
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshHemisphere(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_hemisphere(4, 4);
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshTetrahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_tetrahedron();
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshCube(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_cube();
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshOctahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_octahedron();
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshDodecahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_dodecahedron();
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void LoadMeshIcosahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_icosahedron();
     LoadMeshPar(mesh, par);
-    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
+
+    LoadMeshGPU(mesh);
 }
 
 void DrawMesh(const Mesh& mesh)
