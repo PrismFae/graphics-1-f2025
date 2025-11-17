@@ -42,6 +42,8 @@ void UnloadMesh(Mesh* mesh)
 void LoadMeshPlane(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_plane(1, 1);
+    par_shapes_translate(par, -0.5f, -0.5f, 0.0f);
+
     LoadMeshPar(mesh, par);
     par_shapes_free_mesh(par);
 
@@ -79,6 +81,8 @@ void LoadMeshTetrahedron(Mesh* mesh)
 void LoadMeshCube(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_cube();
+    par_shapes_translate(par, -0.5f, -0.5f, -0.5f);
+
     LoadMeshPar(mesh, par);
     par_shapes_free_mesh(par);
 
