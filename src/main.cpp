@@ -47,14 +47,10 @@ int main()
     GLuint normal_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/normal_color.vert");
     GLuint vertex_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/vertex_color.frag");
 
-    GLuint position_color = CreateProgram(position_color_vert, vertex_color_frag);
-    GLuint tcoord_color = CreateProgram(tcoord_color_vert, vertex_color_frag);
-    GLuint normal_color = CreateProgram(normal_color_vert, vertex_color_frag);
-
     GLuint shaders[SHADER_TYPE_COUNT];
-    shaders[SHADER_POSITION_COLOR] = position_color;
-    shaders[SHADER_TCOORD_COLOR] = tcoord_color;
-    shaders[SHADER_NORMAL_COLOR] = normal_color;
+    shaders[SHADER_POSITION_COLOR] = CreateProgram(position_color_vert, vertex_color_frag);
+    shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
+    shaders[SHADER_NORMAL_COLOR] = CreateProgram(normal_color_vert, vertex_color_frag);
 
     int shader_index = 0;
     int mesh_index = 0;
@@ -97,9 +93,8 @@ int main()
     DestroyShader(&normal_color_vert);
     DestroyShader(&vertex_color_frag);
 
-    DestroyProgram(&position_color);
-    DestroyProgram(&tcoord_color);
-    DestroyProgram(&normal_color);
+    for (int i = 0; i < SHADER_TYPE_COUNT; i++)
+        DestroyProgram(&shaders[i]);
 
     for (int i = 0; i < MESH_TYPE_COUNT; i++)
         UnloadMesh(&solids[i]);
