@@ -56,6 +56,14 @@ void LoadMeshSphere(Mesh* mesh)
     par_shapes_free_mesh(par);
 }
 
+void LoadMeshHemisphere(Mesh* mesh)
+{
+    par_shapes_mesh* par = par_shapes_create_hemisphere(4, 4);
+    LoadMeshPar(mesh, par);
+    LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
+}
+
 void LoadMeshTetrahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_tetrahedron();

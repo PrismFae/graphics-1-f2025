@@ -28,6 +28,7 @@ void UnloadMesh(Mesh* mesh);
 
 void LoadMeshPlane(Mesh* mesh);
 void LoadMeshSphere(Mesh* mesh);
+void LoadMeshHemisphere(Mesh* mesh);
 
 void LoadMeshTetrahedron(Mesh* mesh);
 void LoadMeshCube(Mesh* mesh);

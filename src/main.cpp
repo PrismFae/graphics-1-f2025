@@ -18,11 +18,21 @@ enum ShaderType
 
 enum MeshType
 {
+    // Platonic solids
     MESH_TETRAHEDRON,
     MESH_CUBE,
     MESH_OCTAHEDRON,
     MESH_DODECAHEDRON,
     MESH_ICOSAHEDRON,
+
+    // Parametric surfaces
+    MESH_PLANE,
+    MESH_SPHERE,
+    MESH_HEMISPHERE,
+
+    // Obj files
+    MESH_HEAD,
+
     MESH_TYPE_COUNT
 };
 
@@ -30,17 +40,19 @@ int main()
 {
     CreateWindow(800, 800, "Graphics 1");
 
-    Mesh head, plane, sphere;
-    LoadMesh(&head, "./assets/meshes/head.obj");
-    LoadMeshPlane(&plane);
-    LoadMeshSphere(&sphere);
+    Mesh meshes[MESH_TYPE_COUNT];
 
-    Mesh solids[MESH_TYPE_COUNT];
-    LoadMeshTetrahedron(&solids[MESH_TETRAHEDRON]);
-    LoadMeshCube(&solids[MESH_CUBE]);
-    LoadMeshOctahedron(&solids[MESH_OCTAHEDRON]);
-    LoadMeshDodecahedron(&solids[MESH_DODECAHEDRON]);
-    LoadMeshIcosahedron(&solids[MESH_ICOSAHEDRON]);
+    LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
+    LoadMeshCube(&meshes[MESH_CUBE]);
+    LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
+    LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
+    LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
+
+    LoadMeshPlane(&meshes[MESH_PLANE]);
+    LoadMeshSphere(&meshes[MESH_SPHERE]);
+    LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
+
+    LoadMesh(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -70,8 +82,7 @@ int main()
         //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
         Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
-        //Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
-        Matrix world = MatrixIdentity();
+        Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
         Matrix mvp = world * view * proj;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -79,8 +90,7 @@ int main()
 
         BeginShader(shaders[shader_index]);
             SendMat4(mvp, "u_mvp");
-            //DrawMesh(solids[mesh_index]);
-            DrawMesh(plane);
+            DrawMesh(meshes[mesh_index]);
         EndShader();
 
         BeginGui();
@@ -99,11 +109,7 @@ int main()
         DestroyProgram(&shaders[i]);
 
     for (int i = 0; i < MESH_TYPE_COUNT; i++)
-        UnloadMesh(&solids[i]);
-
-    UnloadMesh(&sphere);
-    UnloadMesh(&plane);
-    UnloadMesh(&head);
+        UnloadMesh(&meshes[i]);
 
     DestroyWindow();
     return 0;
