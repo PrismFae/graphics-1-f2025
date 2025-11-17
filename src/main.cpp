@@ -70,7 +70,8 @@ int main()
         //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
         Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
-        Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD); //MatrixIdentity();
+        //Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
+        Matrix world = MatrixIdentity();
         Matrix mvp = world * view * proj;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -78,7 +79,8 @@ int main()
 
         BeginShader(shaders[shader_index]);
             SendMat4(mvp, "u_mvp");
-            DrawMesh(solids[mesh_index]);
+            //DrawMesh(solids[mesh_index]);
+            DrawMesh(plane);
         EndShader();
 
         BeginGui();

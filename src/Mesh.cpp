@@ -10,7 +10,8 @@
 #include <fast_obj/fast_obj.h>
 
 void LoadMeshGPU(Mesh* mesh);
-void LoadMeshParPlatonic(Mesh* mesh, par_shapes_mesh* par);
+void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par);
+void LoadMeshPlaneManual(Mesh* mesh);
 
 void LoadMesh(Mesh* mesh, const char* path)
 {
@@ -38,49 +39,27 @@ void UnloadMesh(Mesh* mesh)
 
 void LoadMeshPlane(Mesh* mesh)
 {
-    mesh->vertex_count = 6;
+    //LoadMeshPlaneManual(mesh);
+    //LoadMeshGPU(mesh);
 
-    mesh->positions.resize(4);
-    mesh->tcoords.resize(4);
-    mesh->normals.resize(4);
-    mesh->indices.resize(6);
-
-    mesh->positions[0] = { -0.5f, -0.5f, 0.0f };
-    mesh->positions[1] = {  0.5f, -0.5f, 0.0f };
-    mesh->positions[2] = {  0.5f,  0.5f, 0.0f };
-    mesh->positions[3] = {  -0.5f, 0.5f, 0.0f };
-
-    mesh->tcoords[0] = { 0.0f, 0.0f };
-    mesh->tcoords[1] = { 1.0f, 0.0f };
-    mesh->tcoords[2] = { 1.0f, 1.0f };
-    mesh->tcoords[3] = { 0.0f, 1.0f };
-
-    mesh->normals[0] = Vector3UnitZ;
-    mesh->normals[1] = Vector3UnitZ;
-    mesh->normals[2] = Vector3UnitZ;
-    mesh->normals[3] = Vector3UnitZ;
-
-    mesh->indices[0] = 0;
-    mesh->indices[1] = 1;
-    mesh->indices[2] = 2;
-    mesh->indices[3] = 0;
-    mesh->indices[4] = 2;
-    mesh->indices[5] = 3;
-
+    par_shapes_mesh* par = par_shapes_create_plane(1, 1);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
+    par_shapes_free_mesh(par);
 }
 
 void LoadMeshSphere(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_parametric_sphere(8, 8);
-    // Parametric surfaces contain texture coordinates and normals!
+    LoadMeshPar(mesh, par);
+    LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
 
 void LoadMeshTetrahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_tetrahedron();
-    LoadMeshParPlatonic(mesh, par);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
@@ -88,7 +67,7 @@ void LoadMeshTetrahedron(Mesh* mesh)
 void LoadMeshCube(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_cube();
-    LoadMeshParPlatonic(mesh, par);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
@@ -96,7 +75,7 @@ void LoadMeshCube(Mesh* mesh)
 void LoadMeshOctahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_octahedron();
-    LoadMeshParPlatonic(mesh, par);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
@@ -104,7 +83,7 @@ void LoadMeshOctahedron(Mesh* mesh)
 void LoadMeshDodecahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_dodecahedron();
-    LoadMeshParPlatonic(mesh, par);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
@@ -112,7 +91,7 @@ void LoadMeshDodecahedron(Mesh* mesh)
 void LoadMeshIcosahedron(Mesh* mesh)
 {
     par_shapes_mesh* par = par_shapes_create_icosahedron();
-    LoadMeshParPlatonic(mesh, par);
+    LoadMeshPar(mesh, par);
     LoadMeshGPU(mesh);
     par_shapes_free_mesh(par);
 }
@@ -196,7 +175,7 @@ void LoadMeshGPU(Mesh* mesh)
     UnbindIndexBuffer(mesh->ibo);
 }
 
-void LoadMeshParPlatonic(Mesh* mesh, par_shapes_mesh* par)
+void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par)
 {
     // Platonic solids only contain positions initially
     // ntriangles * 3 = vertex_count (amount of elements in index buffer)
@@ -206,10 +185,47 @@ void LoadMeshParPlatonic(Mesh* mesh, par_shapes_mesh* par)
     mesh->indices.resize(mesh->vertex_count);
     mesh->positions.resize(par->npoints);
     mesh->normals.resize(par->npoints);
+    if (par->tcoords != nullptr)
+        mesh->tcoords.resize(par->npoints);
 
     Vector3* par_positions = reinterpret_cast<Vector3*>(par->points);
     Vector3* par_normals = reinterpret_cast<Vector3*>(par->normals);
+    Vector2* par_tcoords = reinterpret_cast<Vector2*>(par->tcoords);
     memcpy(mesh->positions.data(), par_positions, par->npoints * sizeof(Vector3));
     memcpy(mesh->normals.data(), par_normals, par->npoints * sizeof(Vector3));
     memcpy(mesh->indices.data(), par->triangles, mesh->vertex_count * sizeof(PAR_SHAPES_T));
+    if (par_tcoords != nullptr)
+        memcpy(mesh->tcoords.data(), par_tcoords, par->npoints * sizeof(Vector2));
+}
+
+void LoadMeshPlaneManual(Mesh* mesh)
+{
+    mesh->vertex_count = 6;
+
+    mesh->positions.resize(4);
+    mesh->tcoords.resize(4);
+    mesh->normals.resize(4);
+    mesh->indices.resize(6);
+
+    mesh->positions[0] = { -0.5f, -0.5f, 0.0f };
+    mesh->positions[1] = { 0.5f, -0.5f, 0.0f };
+    mesh->positions[2] = { 0.5f,  0.5f, 0.0f };
+    mesh->positions[3] = { -0.5f, 0.5f, 0.0f };
+
+    mesh->tcoords[0] = { 0.0f, 0.0f };
+    mesh->tcoords[1] = { 1.0f, 0.0f };
+    mesh->tcoords[2] = { 1.0f, 1.0f };
+    mesh->tcoords[3] = { 0.0f, 1.0f };
+
+    mesh->normals[0] = Vector3UnitZ;
+    mesh->normals[1] = Vector3UnitZ;
+    mesh->normals[2] = Vector3UnitZ;
+    mesh->normals[3] = Vector3UnitZ;
+
+    mesh->indices[0] = 0;
+    mesh->indices[1] = 1;
+    mesh->indices[2] = 2;
+    mesh->indices[3] = 0;
+    mesh->indices[4] = 2;
+    mesh->indices[5] = 3;
 }
