@@ -19,8 +19,6 @@ void LoadMeshObj(Mesh* mesh, const char* path)
 
 	// LoadMesh transforms an internal fastObjMesh into our renderer's unified Mesh type
 	fast_obj_destroy(obj);
-
-
 }
 
 void UnloadMesh(Mesh* mesh)
