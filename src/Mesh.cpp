@@ -11,7 +11,8 @@
 
 void LoadMeshGPU(Mesh* mesh);
 void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par);
-void LoadMeshPlaneManual(Mesh* mesh);
+void LoadMeshPlaneOptimal(Mesh* mesh);
+void LoadMeshPlaneUnoptimal(Mesh* mesh);
 
 void LoadMeshObj(Mesh* mesh, const char* path)
 {
@@ -39,13 +40,13 @@ void UnloadMesh(Mesh* mesh)
 
 void LoadMeshPlane(Mesh* mesh)
 {
-    par_shapes_mesh* par = par_shapes_create_plane(1, 1);
-    par_shapes_translate(par, -0.5f, -0.5f, 0.0f);
+    //par_shapes_mesh* par = par_shapes_create_plane(1, 1);
+    //par_shapes_translate(par, -0.5f, -0.5f, 0.0f);
+    //
+    //LoadMeshPar(mesh, par);
+    //par_shapes_free_mesh(par);
 
-    LoadMeshPar(mesh, par);
-    par_shapes_free_mesh(par);
-
-    //LoadMeshPlaneManual(mesh);
+    LoadMeshPlaneUnoptimal(mesh);
     LoadMeshGPU(mesh);
 }
 
@@ -164,7 +165,9 @@ void LoadMeshGPU(Mesh* mesh)
 
     mesh->vao = CreateVertexArray();
     BindVertexArray(mesh->vao);
-    BindIndexBuffer(mesh->ibo);
+
+    if (mesh->ibo != GL_NONE)
+        BindIndexBuffer(mesh->ibo);
 
     EnableVertexAttribute(0);
     EnableVertexAttribute(1);
@@ -181,7 +184,7 @@ void LoadMeshGPU(Mesh* mesh)
         SetVertexAttribute(1, 2, GL_FLOAT, sizeof(Vector2));
         UnbindVertexBuffer(mesh->tbo);
     }
-   
+    
     if (mesh->nbo != GL_NONE)
     {
         BindVertexBuffer(mesh->nbo);
@@ -190,7 +193,9 @@ void LoadMeshGPU(Mesh* mesh)
     }
 
     UnbindVertexArray(mesh->vao);
-    UnbindIndexBuffer(mesh->ibo);
+
+    if (mesh->ibo != GL_NONE)
+        UnbindIndexBuffer(mesh->ibo);
 }
 
 void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par)
@@ -216,7 +221,7 @@ void LoadMeshPar(Mesh* mesh, par_shapes_mesh* par)
         memcpy(mesh->tcoords.data(), par_tcoords, par->npoints * sizeof(Vector2));
 }
 
-void LoadMeshPlaneManual(Mesh* mesh)
+void LoadMeshPlaneOptimal(Mesh* mesh)
 {
     mesh->vertex_count = 6;
 
@@ -246,4 +251,56 @@ void LoadMeshPlaneManual(Mesh* mesh)
     mesh->indices[3] = 0;
     mesh->indices[4] = 2;
     mesh->indices[5] = 3;
+}
+
+void LoadMeshPlaneUnoptimal(Mesh* mesh)
+{
+    mesh->vertex_count = 6;
+
+    std::vector<Vector3> positions;
+    std::vector<Vector2> tcoords;
+    std::vector<Vector3> normals;
+    std::vector<uint16_t> indices;
+
+    positions.resize(4);
+    tcoords.resize(4);
+    normals.resize(4);
+    indices.resize(6);
+    
+    positions[0] = { -0.5f, -0.5f, 0.0f };
+    positions[1] = { 0.5f, -0.5f, 0.0f };
+    positions[2] = { 0.5f,  0.5f, 0.0f };
+    positions[3] = { -0.5f, 0.5f, 0.0f };
+
+    tcoords[0] = { 0.0f, 0.0f };
+    tcoords[1] = { 1.0f, 0.0f };
+    tcoords[2] = { 1.0f, 1.0f };
+    tcoords[3] = { 0.0f, 1.0f };
+
+    normals[0] = Vector3UnitZ;
+    normals[1] = Vector3UnitZ;
+    normals[2] = Vector3UnitZ;
+    normals[3] = Vector3UnitZ;
+
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 0;
+    indices[4] = 2;
+    indices[5] = 3;
+
+    mesh->positions.resize(6);
+    mesh->tcoords.resize(6);
+    mesh->normals.resize(6);
+    for (size_t i = 0; i < indices.size(); i++)
+    {
+        uint16_t index = indices[i];
+        Vector3 v = positions[index];
+        Vector2 vt = tcoords[index];
+        Vector3 vn = normals[index];
+
+        mesh->positions[i] = v;
+        mesh->tcoords[i] = vt;
+        mesh->normals[i] = vn;
+    }
 }
