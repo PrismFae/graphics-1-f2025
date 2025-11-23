@@ -23,12 +23,12 @@ void LoadMeshObj(Mesh* mesh, const char* path)
         return;
     }
 
-    // Expand face-vertex indices into a non-indexed vertex list (one vertex per face-vertex)
-    int vcount = obj->index_count; // number of face-vertex references (triangles * 3)
+    // number of face-vertex references
+    int vcount = obj->index_count; 
     mesh->vertex_count = vcount;
 
 	// Clear any existing mesh data
-    mesh->positions.resize(vcount);
+	mesh->positions.resize(vcount); // Resizes to amount of face-vertices
     mesh->tcoords.clear();
     mesh->normals.clear();
     mesh->indices.clear();
