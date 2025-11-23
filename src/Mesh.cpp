@@ -16,10 +16,70 @@ void LoadMeshPlaneUnoptimal(Mesh* mesh);
 
 void LoadMeshObj(Mesh* mesh, const char* path)
 {
-	fastObjMesh* obj = fast_obj_read(path);
+    fastObjMesh* obj = fast_obj_read(path);
+    if (obj == nullptr)
+    {
+        printf("Failed to load OBJ: %s\n", path);
+        return;
+    }
 
-	// LoadMesh transforms an internal fastObjMesh into our renderer's unified Mesh type
-	fast_obj_destroy(obj);
+    // Expand face-vertex indices into a non-indexed vertex list (one vertex per face-vertex)
+    int vcount = obj->index_count; // number of face-vertex references (triangles * 3)
+    mesh->vertex_count = vcount;
+
+	// Clear any existing mesh data
+    mesh->positions.resize(vcount);
+    mesh->tcoords.clear();
+    mesh->normals.clear();
+    mesh->indices.clear();
+
+	// If the OBJ has texcoords/normals, allocate space for them
+    bool has_tcoords = (obj->texcoord_count > 0) && (obj->texcoords != nullptr);
+    bool has_normals = (obj->normal_count > 0) && (obj->normals != nullptr);
+
+    if (has_tcoords) mesh->tcoords.resize(vcount);
+    if (has_normals) mesh->normals.resize(vcount);
+
+	// loops through each face-vertex and assigns position, texcoord and normal data
+    for (int i = 0; i < vcount; ++i)
+    {
+		// Position of each face-vertex
+        int p = obj->indices[i].p * 3;
+        mesh->positions[i].x = obj->positions[p + 0];
+        mesh->positions[i].y = obj->positions[p + 1];
+        mesh->positions[i].z = obj->positions[p + 2];
+
+		// Finds texture coordinates and assigns them to the mesh
+        if (has_tcoords && obj->indices[i].t >= 0)
+        {
+            int t = obj->indices[i].t * 2;
+            mesh->tcoords[i].x = obj->texcoords[t + 0];
+            mesh->tcoords[i].y = obj->texcoords[t + 1];
+        }
+        else if (has_tcoords)
+        {
+            mesh->tcoords[i] = { 0.0f, 0.0f };
+        }
+
+		// Finds normals and assigns them to the mesh
+        if (has_normals && obj->indices[i].n >= 0)
+        {
+            int n = obj->indices[i].n * 3;
+            mesh->normals[i].x = obj->normals[n + 0];
+            mesh->normals[i].y = obj->normals[n + 1];
+            mesh->normals[i].z = obj->normals[n + 2];
+        }
+        else if (has_normals)
+        {
+            mesh->normals[i] = { 0.0f, 0.0f, 0.0f };
+        }
+    }
+
+
+    // Use non-indexed drawing (duplicated vertices). Upload to GPU.
+    LoadMeshGPU(mesh);
+
+    fast_obj_destroy(obj);
 }
 
 void UnloadMesh(Mesh* mesh)

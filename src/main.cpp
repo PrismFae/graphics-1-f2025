@@ -18,17 +18,17 @@ enum ShaderType
 
 enum MeshType
 {
-    // Platonic solids
-    MESH_TETRAHEDRON,
-    MESH_CUBE,
-    MESH_OCTAHEDRON,
-    MESH_DODECAHEDRON,
-    MESH_ICOSAHEDRON,
+    //// Platonic solids
+    //MESH_TETRAHEDRON,
+    //MESH_CUBE,
+    //MESH_OCTAHEDRON,
+    //MESH_DODECAHEDRON,
+    //MESH_ICOSAHEDRON,
 
-    // Parametric surfaces
+    //// Parametric surfaces
     MESH_PLANE,
-    MESH_SPHERE,
-    MESH_HEMISPHERE,
+    //MESH_SPHERE,
+    //MESH_HEMISPHERE,
 
     // Obj files
     MESH_HEAD,
@@ -42,20 +42,20 @@ int main()
 
     Mesh meshes[MESH_TYPE_COUNT];
 
-    LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
-    LoadMeshCube(&meshes[MESH_CUBE]);
-    LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
-    LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
-    LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
+    //LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
+    //LoadMeshCube(&meshes[MESH_CUBE]);
+    //LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
+    //LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
+    //LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
 
     LoadMeshPlane(&meshes[MESH_PLANE]);
-    LoadMeshSphere(&meshes[MESH_SPHERE]);
-    LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
+    //LoadMeshSphere(&meshes[MESH_SPHERE]);
+    //LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
-    //LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
-    LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/plane.obj");
+    LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
+    //LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/plane.obj");
     
-    GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
+    GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert"); 
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
     GLuint normal_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/normal_color.vert");
     GLuint vertex_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/vertex_color.frag");
@@ -92,8 +92,8 @@ int main()
 
         BeginShader(shaders[shader_index]);
             SendMat4(mvp, "u_mvp");
-            DrawMesh(meshes[MESH_PLANE]);
-            //DrawMesh(meshes[mesh_index]);
+            //DrawMesh(meshes[MESH_PLANE]);
+            DrawMesh(meshes[mesh_index]);
         EndShader();
 
         BeginGui();
