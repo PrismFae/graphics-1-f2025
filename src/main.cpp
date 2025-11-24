@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Shader.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 #include <imgui/imgui.h>
 #include <cstddef>
@@ -39,6 +40,8 @@ enum MeshType
 int main()
 {
     CreateWindow(800, 800, "Graphics 1");
+
+    ImageTest();
 
     Mesh meshes[MESH_TYPE_COUNT];
 

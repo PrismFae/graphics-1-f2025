@@ -16,6 +16,9 @@
     <Filter Include="Header Files\imgui">
       <UniqueIdentifier>{fc84a823-1c7b-4758-82ed-e273983343eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\stb_image">
+      <UniqueIdentifier>{b456e640-d0e8-4139-8d57-e0874e756af2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -56,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="inc\imgui\imgui_impl_glfw.cpp">
       <Filter>Header Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="src\Mesh.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\stb_image\stb_image.h">
+      <Filter>Header Files\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\stb_image\stb_image_write.h">
+      <Filter>Header Files\stb_image</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
