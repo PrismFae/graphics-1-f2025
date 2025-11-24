@@ -41,7 +41,10 @@ int main()
 {
     CreateWindow(800, 800, "Graphics 1");
 
-    ImageTest();
+    int image_width, image_height;
+    std::vector<Pixel> pixels;
+    GenerateGradient(image_width, image_height, pixels);
+    WriteImage(image_width, image_height, pixels);
 
     Mesh meshes[MESH_TYPE_COUNT];
 
