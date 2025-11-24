@@ -16,10 +16,23 @@ void LoadMeshPlaneUnoptimal(Mesh* mesh);
 
 void LoadMeshObj(Mesh* mesh, const char* path)
 {
+    // Follow the same pattern for tcoords and normals if you didn't complete the obj-loader for assignment 3!
 	fastObjMesh* obj = fast_obj_read(path);
 
-	// LoadMesh transforms an internal fastObjMesh into our renderer's unified Mesh type
+    size_t vc = obj->index_count;
+    mesh->vertex_count = vc;
+    mesh->positions.resize(vc);
+
+    Vector3* positions = (Vector3*)obj->positions;
+    for (size_t i = 0; i < vc; i++)
+    {
+        fastObjUInt idx_v = obj->indices[i].p;
+        Vector3 v = positions[idx_v];
+        mesh->positions[i] = v;
+    }
+
 	fast_obj_destroy(obj);
+    LoadMeshGPU(mesh);
 }
 
 void UnloadMesh(Mesh* mesh)
@@ -268,9 +281,9 @@ void LoadMeshPlaneUnoptimal(Mesh* mesh)
     indices.resize(6);
     
     positions[0] = { -0.5f, -0.5f, 0.0f };
-    positions[1] = { 0.5f, -0.5f, 0.0f };
-    positions[2] = { 0.5f,  0.5f, 0.0f };
-    positions[3] = { -0.5f, 0.5f, 0.0f };
+    positions[1] = {  0.5f, -0.5f, 0.0f };
+    positions[2] = {  0.5f,  0.5f, 0.0f };
+    positions[3] = { -0.5f,  0.5f, 0.0f };
 
     tcoords[0] = { 0.0f, 0.0f };
     tcoords[1] = { 1.0f, 0.0f };

@@ -66,7 +66,7 @@ int main()
     shaders[SHADER_NORMAL_COLOR] = CreateProgram(normal_color_vert, vertex_color_frag);
 
     int shader_index = 0;
-    int mesh_index = 0;
+    int mesh_index = MESH_HEAD;
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -92,8 +92,7 @@ int main()
 
         BeginShader(shaders[shader_index]);
             SendMat4(mvp, "u_mvp");
-            DrawMesh(meshes[MESH_PLANE]);
-            //DrawMesh(meshes[mesh_index]);
+            DrawMesh(meshes[mesh_index]);
         EndShader();
 
         BeginGui();
