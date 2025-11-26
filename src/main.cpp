@@ -110,6 +110,7 @@ int main()
             ++texture_index %= TEXTURE_TYPE_COUNT;
 
         float tt = Time();
+        float nsin = sinf(tt) * 0.5f + 0.5f;    // <-- oscilates between [0.0, 1.0] forever!
 
         //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);

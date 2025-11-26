@@ -66,6 +66,9 @@ void LoadTexture(Texture* texture, const Image& image)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	// OpenGL's texture coordinates (S, T) differ from (U, V) such that Y is inverted, so flip our image vertically before uploading to the GPU
+	stbi__vertical_flip((void*)image.pixels.data(), image.width, image.height, sizeof(Pixel));
+
 	// Describe texture data and upload to GPU
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.pixels.data());
 
@@ -99,3 +102,7 @@ void EndTexture()
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	f_texture = GL_NONE;
 }
+
+// Extra practice:
+// Read all of https://learnopengl.com/Getting-started/Textures
+// Modify this program to interpolate between the warm and cool gradients based on a periodic function
