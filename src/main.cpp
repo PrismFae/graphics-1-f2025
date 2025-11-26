@@ -37,18 +37,29 @@ enum MeshType
     MESH_TYPE_COUNT
 };
 
+enum TextureType
+{
+    TEXTURE_GRADIENT_WARM,
+    TEXTURE_GRADIENT_COOL,
+    TEXTURE_TYPE_COUNT
+};
+
+void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
+{
+    Image warm, cool;
+    LoadImage(&warm, 512, 512);
+    LoadImage(&cool, 512, 512);
+    LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
+    LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
+    
+    LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
+    LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
+    // (No need to call UnloadImage because warm & cool's memory gets cleaned up by stl vector destructor after this function returns)!
+}
+
 int main()
 {
     CreateWindow(800, 800, "Graphics 1");
-
-    Texture grad0, grad1;
-    LoadTexture(&grad0, 512, 512);
-    LoadTexture(&grad1, 512, 512);
-
-    GenerateGradient(&grad0, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
-    GenerateGradient(&grad1, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
-    SaveTexture("./assets/textures/grad0.png", grad0);
-    SaveTexture("./assets/textures/grad1.png", grad1);
 
     Mesh meshes[MESH_TYPE_COUNT];
 
@@ -62,8 +73,8 @@ int main()
     LoadMeshSphere(&meshes[MESH_SPHERE]);
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
-    //LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
-    LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/plane.obj");
+    LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
+    //LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/plane.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -75,8 +86,12 @@ int main()
     shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
     shaders[SHADER_NORMAL_COLOR] = CreateProgram(normal_color_vert, vertex_color_frag);
 
+    Texture textures[TEXTURE_TYPE_COUNT];
+    LoadTextures(textures);
+
     int shader_index = 0;
     int mesh_index = MESH_HEAD;
+    int texture_index = TEXTURE_GRADIENT_WARM;
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_ESCAPE))
@@ -87,6 +102,9 @@ int main()
 
         if (IsKeyPressed(KEY_TAB))
             ++mesh_index %= MESH_TYPE_COUNT;
+
+        if (IsKeyPressed(KEY_T))
+            ++texture_index %= TEXTURE_TYPE_COUNT;
 
         float tt = Time();
 
@@ -101,8 +119,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         BeginShader(shaders[shader_index]);
+        BeginTexture(textures[texture_index]);
             SendMat4(mvp, "u_mvp");
             DrawMesh(meshes[mesh_index]);
+        EndTexture();
         EndShader();
 
         BeginGui();
@@ -116,6 +136,9 @@ int main()
     DestroyShader(&tcoord_color_vert);
     DestroyShader(&normal_color_vert);
     DestroyShader(&vertex_color_frag);
+
+    for (int i = 0; i < TEXTURE_TYPE_COUNT; i++)
+        UnloadTexture(&textures[i]);
 
     for (int i = 0; i < SHADER_TYPE_COUNT; i++)
         DestroyProgram(&shaders[i]);

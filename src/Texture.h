@@ -13,14 +13,32 @@ struct Pixel
 	uint8_t a = 0xFF;
 };
 
-struct Texture
+// CPU-only memory
+struct Image
 {
 	int width = -1;
 	int height = -1;
+	int channels = -1;
 	std::vector<Pixel> pixels;
 };
 
-void LoadTexture(Texture* texture, int width, int height);
+// GPU-only memory
+struct Texture
+{
+	GLuint handle = GL_NONE;
+	int width = -1;
+	int height = -1;
+	int channels = -1;
+};
 
-void GenerateGradient(Texture* texture, Vector3 uv_00/*bottom-left*/, Vector3 uv_10/*bottom-right*/, Vector3 uv_01/*top-left*/, Vector3 uv_11/*top-right*/);
-void SaveTexture(const char* filename, const Texture& texture);
+void LoadImage(Image* image, int width, int height);
+void UnloadImage(Image* image);
+
+void LoadImageGradient(Image* image, Vector3 uv_00/*bottom-left*/, Vector3 uv_10/*bottom-right*/, Vector3 uv_01/*top-left*/, Vector3 uv_11/*top-right*/);
+void SaveImage(const char* filename, const Image& image);
+
+void LoadTexture(Texture* texture, const Image& image);
+void UnloadTexture(Texture* texture);
+
+void BeginTexture(const Texture& texture);
+void EndTexture();
