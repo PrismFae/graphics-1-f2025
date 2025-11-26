@@ -41,10 +41,14 @@ int main()
 {
     CreateWindow(800, 800, "Graphics 1");
 
-    int image_width, image_height;
-    std::vector<Pixel> pixels;
-    GenerateGradient(image_width, image_height, pixels);
-    WriteImage(image_width, image_height, pixels);
+    Texture grad0, grad1;
+    LoadTexture(&grad0, 512, 512);
+    LoadTexture(&grad1, 512, 512);
+
+    GenerateGradient(&grad0, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
+    GenerateGradient(&grad1, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
+    SaveTexture("./assets/textures/grad0.png", grad0);
+    SaveTexture("./assets/textures/grad1.png", grad1);
 
     Mesh meshes[MESH_TYPE_COUNT];
 
