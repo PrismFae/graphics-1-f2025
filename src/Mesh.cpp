@@ -59,7 +59,7 @@ void LoadMeshPlane(Mesh* mesh)
     //LoadMeshPar(mesh, par);
     //par_shapes_free_mesh(par);
 
-    LoadMeshPlaneUnoptimal(mesh);
+    LoadMeshPlaneOptimal(mesh);
     LoadMeshGPU(mesh);
 }
 

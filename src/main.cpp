@@ -11,6 +11,7 @@
 
 enum ShaderType
 {
+    SHADER_SAMPLE_TEXTURE,
     SHADER_POSITION_COLOR,
     SHADER_TCOORD_COLOR,
     SHADER_NORMAL_COLOR,
@@ -74,14 +75,16 @@ int main()
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
     LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
-    //LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/plane.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
     GLuint normal_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/normal_color.vert");
     GLuint vertex_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/vertex_color.frag");
+    GLuint a4_texture_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a4_texture.vert");
+    GLuint a4_texture_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a4_texture.frag");
 
     GLuint shaders[SHADER_TYPE_COUNT];
+    shaders[SHADER_SAMPLE_TEXTURE] = CreateProgram(a4_texture_vert, a4_texture_frag);
     shaders[SHADER_POSITION_COLOR] = CreateProgram(position_color_vert, vertex_color_frag);
     shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
     shaders[SHADER_NORMAL_COLOR] = CreateProgram(normal_color_vert, vertex_color_frag);
@@ -89,8 +92,8 @@ int main()
     Texture textures[TEXTURE_TYPE_COUNT];
     LoadTextures(textures);
 
-    int shader_index = 0;
-    int mesh_index = MESH_HEAD;
+    int shader_index = SHADER_SAMPLE_TEXTURE;
+    int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_GRADIENT_WARM;
     while (!WindowShouldClose())
     {
