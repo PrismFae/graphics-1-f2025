@@ -53,11 +53,12 @@ void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
     LoadImage(&cool, 512, 512);
     LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
     LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
-    SaveImage("./assets/textures/cool_gradient.png", cool);
+
+    // Uncomment to view gradient within the following file:
+    //SaveImage("./assets/textures/cool_gradient.png", cool);
 
     LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
     LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
-    // (No need to call UnloadImage because warm & cool's memory gets cleaned up by stl vector destructor after this function returns)!
 }
 
 struct Camera
@@ -106,7 +107,7 @@ int main()
 
     int shader_index = SHADER_SAMPLE_TEXTURE;
     int mesh_index = MESH_PLANE;
-    int texture_index = TEXTURE_GRADIENT_WARM;
+    int texture_index = TEXTURE_GRADIENT_COOL;
     while (!WindowShouldClose())
     {
         BeginFrame();
@@ -125,7 +126,7 @@ int main()
             ++texture_index %= TEXTURE_TYPE_COUNT;
 
         float tt = Time();
-        float nsin = sinf(tt) * 0.5f + 0.5f;    // <-- oscilates between [0.0, 1.0] forever!
+        float nsin = sinf(tt) * 0.5f + 0.5f;
 
         // Below is test-rotation code. For full marks, you must rotate the camera with the mouse delta that should be implemented as follows:
         // Extend Window.h & Window.cpp based on glfw documentation to track the change in mouse-position between frames, then make a function to return the mouse delta as a Vector2.
@@ -206,8 +207,3 @@ int main()
     DestroyWindow();
     return 0;
 }
-
-// Old mvp matrix to spin an object about the y-axis with a 2d projection
-//Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
-//Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
-//Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
