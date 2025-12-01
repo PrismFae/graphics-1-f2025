@@ -46,6 +46,16 @@ enum TextureType
     TEXTURE_TYPE_COUNT
 };
 
+enum A4DrawType
+{
+    A4_PAR_SHAPES_NORMAL_SHADER,
+    A4_OBJ_FILE_TCOORDS_SHADER,
+    A4_CT4_TEXTURE_SHADER,
+    A4_MANUAL_MESH,
+    A4_CUSTOM_DRAW,
+    A4_TYPE_COUNT
+};
+
 void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
 {
     Image warm, cool;
@@ -108,6 +118,7 @@ int main()
     int shader_index = SHADER_SAMPLE_TEXTURE;
     int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_GRADIENT_COOL;
+    int draw_index = A4_PAR_SHAPES_NORMAL_SHADER;
     while (!WindowShouldClose())
     {
         BeginFrame();
@@ -124,6 +135,9 @@ int main()
 
         if (IsKeyPressed(KEY_T))
             ++texture_index %= TEXTURE_TYPE_COUNT;
+
+        if (IsKeyPressed(KEY_Y))
+            ++draw_index %= A4_TYPE_COUNT;
 
         float tt = Time();
         float nsin = sinf(tt) * 0.5f + 0.5f;
@@ -175,12 +189,32 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        BeginShader(shaders[shader_index]);
-        BeginTexture(textures[texture_index]);
-            SendMat4(mvp, "u_mvp");
-            DrawMesh(meshes[mesh_index]);
-        EndTexture();
-        EndShader();
+        // Example "mix-and-match" draw calls to understand Smiley's code
+        //BeginShader(shaders[shader_index]);
+        //BeginTexture(textures[texture_index]);
+        //    SendMat4(mvp, "u_mvp");
+        //    DrawMesh(meshes[mesh_index]);
+        //EndTexture();
+        //EndShader();
+        // (Replace with A4 draw types within the switch-case below):
+
+        switch (draw_index)
+        {
+        case A4_PAR_SHAPES_NORMAL_SHADER:
+            break;
+
+        case A4_OBJ_FILE_TCOORDS_SHADER:
+            break;
+
+        case A4_CT4_TEXTURE_SHADER:
+            break;
+
+        case A4_MANUAL_MESH:
+            break;
+
+        case A4_CUSTOM_DRAW:
+            break;
+        }
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
