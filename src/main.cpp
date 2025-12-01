@@ -21,11 +21,12 @@ enum ShaderType
 enum MeshType
 {
     // Platonic solids
-    MESH_TETRAHEDRON,
-    MESH_CUBE,
-    MESH_OCTAHEDRON,
-    MESH_DODECAHEDRON,
-    MESH_ICOSAHEDRON,
+    //MESH_TETRAHEDRON,
+    //MESH_CUBE,
+    //MESH_OCTAHEDRON,
+    //MESH_DODECAHEDRON,
+    //MESH_ICOSAHEDRON,
+    // Removed platonic solids since they don't have texture coordinates
 
     // Parametric surfaces
     MESH_PLANE,
@@ -52,11 +53,19 @@ void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
     LoadImage(&cool, 512, 512);
     LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
     LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
-    
+    SaveImage("./assets/textures/cool_gradient.png", cool);
+
     LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
     LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
     // (No need to call UnloadImage because warm & cool's memory gets cleaned up by stl vector destructor after this function returns)!
 }
+
+struct Camera
+{
+    float pitch = 0.0f;
+    float yaw = 0.0f;
+    Vector3 position = Vector3Zeros;
+};
 
 int main()
 {
@@ -64,11 +73,11 @@ int main()
 
     Mesh meshes[MESH_TYPE_COUNT];
 
-    LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
-    LoadMeshCube(&meshes[MESH_CUBE]);
-    LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
-    LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
-    LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
+    //LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
+    //LoadMeshCube(&meshes[MESH_CUBE]);
+    //LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
+    //LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
+    //LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
 
     LoadMeshPlane(&meshes[MESH_PLANE]);
     LoadMeshSphere(&meshes[MESH_SPHERE]);
@@ -92,11 +101,17 @@ int main()
     Texture textures[TEXTURE_TYPE_COUNT];
     LoadTextures(textures);
 
+    Camera camera;
+    camera.position = { 0.0f, 0.0f, 5.0f };
+
     int shader_index = SHADER_SAMPLE_TEXTURE;
     int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_GRADIENT_WARM;
     while (!WindowShouldClose())
     {
+        BeginFrame();
+        float dt = FrameTime();
+
         if (IsKeyPressed(KEY_ESCAPE))
             SetWindowShouldClose(true);
 
@@ -104,7 +119,7 @@ int main()
             ++shader_index %= SHADER_TYPE_COUNT;
 
         if (IsKeyPressed(KEY_TAB))
-            ++mesh_index %= MESH_TYPE_COUNT;
+            mesh_index = MESH_PLANE + ((mesh_index + 1) % MESH_TYPE_COUNT);
 
         if (IsKeyPressed(KEY_T))
             ++texture_index %= TEXTURE_TYPE_COUNT;
@@ -112,10 +127,47 @@ int main()
         float tt = Time();
         float nsin = sinf(tt) * 0.5f + 0.5f;    // <-- oscilates between [0.0, 1.0] forever!
 
-        //Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
+        // Below is test-rotation code. For full marks, you must rotate the camera with the mouse delta that should be implemented as follows:
+        // Extend Window.h & Window.cpp based on glfw documentation to track the change in mouse-position between frames, then make a function to return the mouse delta as a Vector2.
+        if (IsKeyDown(KEY_1))
+            camera.yaw -= 100.0f * dt * DEG2RAD;
+        
+        if (IsKeyDown(KEY_2))
+            camera.yaw += 100.0f * dt * DEG2RAD;
+        
+        if (IsKeyDown(KEY_3))
+            camera.pitch -= 100.0f * dt * DEG2RAD;
+        
+        if (IsKeyDown(KEY_4))
+            camera.pitch += 100.0f * dt * DEG2RAD;
+
+        Matrix camera_rotation = MatrixRotateY(camera.yaw) * MatrixRotateX(camera.pitch);
+        Vector3 camera_direction_z = { camera_rotation.m8, camera_rotation.m9, camera_rotation.m10 };
+        Vector3 camera_direction_x = { camera_rotation.m0, camera_rotation.m1, camera_rotation.m2 };
+        Vector3 camera_direction_y = { camera_rotation.m4, camera_rotation.m5, camera_rotation.m6 };
+
+        if (IsKeyDown(KEY_W))
+            camera.position -= camera_direction_z * 10.0f * dt;
+        
+        if (IsKeyDown(KEY_S))
+            camera.position += camera_direction_z * 10.0f * dt;
+        
+        if (IsKeyDown(KEY_D))
+            camera.position += camera_direction_x * 10.0f * dt;
+        
+        if (IsKeyDown(KEY_A))
+            camera.position -= camera_direction_x * 10.0f * dt;
+         
+        if (IsKeyDown(KEY_SPACE))
+            camera.position += camera_direction_y * 10.0f * dt;
+        
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+            camera.position -= camera_direction_y * 10.0f * dt;
+
+        // view-matrix is the inverse of the camera matrix
+        // camera-matrix is the translation & rotation about y & x of the camera
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
-        Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
-        //Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
+        Matrix view = MatrixInvert(camera_rotation * MatrixTranslate(camera.position.x, camera.position.y, camera.position.z));
         Matrix world = MatrixIdentity();
         Matrix mvp = world * view * proj;
 
@@ -134,6 +186,7 @@ int main()
         EndGui();
 
         Loop();
+        EndFrame();
     }
 
     DestroyShader(&position_color_vert);
@@ -153,3 +206,8 @@ int main()
     DestroyWindow();
     return 0;
 }
+
+// Old mvp matrix to spin an object about the y-axis with a 2d projection
+//Matrix proj = MatrixOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 100.0f);
+//Matrix view = MatrixLookAt({ 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 0.0f }, Vector3UnitY);
+//Matrix world = MatrixRotateY(tt * 100.0f * DEG2RAD);
