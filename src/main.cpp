@@ -12,6 +12,8 @@
 enum ShaderType
 {
     SHADER_LIGHTING,
+    SHADER_FLAT,
+
     SHADER_SAMPLE_TEXTURE,
     SHADER_POSITION_COLOR,
     SHADER_TCOORD_COLOR,
@@ -86,9 +88,12 @@ int main()
     GLuint a4_texture_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a4_texture.frag");
     GLuint a5_lighting_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a5_lighting.vert");
     GLuint a5_lighting_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a5_lighting.frag");
+    GLuint pass_through_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/pass_through.vert");
+    GLuint pass_through_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/pass_through.frag");
 
     GLuint shaders[SHADER_TYPE_COUNT];
     shaders[SHADER_LIGHTING] = CreateProgram(a5_lighting_vert, a5_lighting_frag);
+    shaders[SHADER_FLAT] = CreateProgram(pass_through_vert, pass_through_frag);
     shaders[SHADER_SAMPLE_TEXTURE] = CreateProgram(a4_texture_vert, a4_texture_frag);
     shaders[SHADER_POSITION_COLOR] = CreateProgram(position_color_vert, vertex_color_frag);
     shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
@@ -101,6 +106,7 @@ int main()
     camera.position = { 0.0f, 0.0f, 5.0f };
 
     Vector3 light_position = Vector3UnitZ * 5.0f;
+    Vector3 light_color = Vector3Ones;
 
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_HEAD;
@@ -169,27 +175,30 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render scene
-        BeginShader(shaders[shader_index]);
         BeginTexture(textures[texture_index]);
-            SendVec3(light_position, "u_light_position");
-            SendMat4(world, "u_world");
-            SendMat4(mvp, "u_mvp");
-            DrawMesh(meshes[mesh_index]);
+            BeginShader(shaders[shader_index]);
+                SendVec3(light_position, "u_light_position");
+                SendVec3(light_color, "u_light_color");
+                SendMat4(world, "u_world");
+                SendMat4(mvp, "u_mvp");
+                DrawMesh(meshes[mesh_index]);
+            EndShader();
         EndTexture();
-        EndShader();
 
         // Render light
-        //BeginShader(shaders[shader_index]);
-        //BeginTexture(textures[texture_index]);
-        //SendVec3(light_position, "u_light_position");
-        //SendMat4(world, "u_world");
-        //SendMat4(mvp, "u_mvp");
-        //DrawMesh(meshes[mesh_index]);
-        //EndTexture();
-        //EndShader();
+        world = MatrixTranslate(light_position.x, light_position.y, light_position.z);
+        mvp = world * view * proj;
+        BeginShader(shaders[SHADER_FLAT]);
+            SendVec3(light_color, "u_color");
+            SendMat4(mvp, "u_mvp");
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                DrawMesh(meshes[MESH_SPHERE]);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        EndShader();
 
         BeginGui();
         ImGui::SliderFloat3("Light Position", &light_position.x, -10.0f, 10.0f);
+        ImGui::ColorPicker3("Light Color", &light_color.x);
         //ImGui::ShowDemoWindow(nullptr);
         EndGui();
 
