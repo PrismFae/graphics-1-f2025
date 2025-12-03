@@ -95,6 +95,8 @@ int main()
     Camera camera;
     camera.position = { 0.0f, 0.0f, 5.0f };
 
+    Vector3 light_position = Vector3UnitZ * 5.0f;
+
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_CT4;
@@ -157,7 +159,6 @@ int main()
         Matrix view = MatrixInvert(camera_rotation * MatrixTranslate(camera.position.x, camera.position.y, camera.position.z));
         Matrix world = MatrixIdentity();
         Matrix mvp = world * view * proj;
-        Vector3 light_position = Vector3UnitZ * 5.0f;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,6 +173,7 @@ int main()
         EndShader();
 
         BeginGui();
+        ImGui::SliderFloat3("Light Position", &light_position.x, -10.0f, 10.0f);
         //ImGui::ShowDemoWindow(nullptr);
         EndGui();
 
