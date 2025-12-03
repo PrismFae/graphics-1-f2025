@@ -11,6 +11,7 @@
 
 enum ShaderType
 {
+    SHADER_LIGHTING,
     SHADER_SAMPLE_TEXTURE,
     SHADER_POSITION_COLOR,
     SHADER_TCOORD_COLOR,
@@ -78,8 +79,11 @@ int main()
     GLuint vertex_color_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/vertex_color.frag");
     GLuint a4_texture_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a4_texture.vert");
     GLuint a4_texture_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a4_texture.frag");
+    GLuint a5_lighting_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/a5_lighting.vert");
+    GLuint a5_lighting_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a5_lighting.frag");
 
     GLuint shaders[SHADER_TYPE_COUNT];
+    shaders[SHADER_LIGHTING] = CreateProgram(a5_lighting_vert, a5_lighting_frag);
     shaders[SHADER_SAMPLE_TEXTURE] = CreateProgram(a4_texture_vert, a4_texture_frag);
     shaders[SHADER_POSITION_COLOR] = CreateProgram(position_color_vert, vertex_color_frag);
     shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
@@ -91,7 +95,7 @@ int main()
     Camera camera;
     camera.position = { 0.0f, 0.0f, 5.0f };
 
-    int shader_index = SHADER_SAMPLE_TEXTURE;
+    int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_CT4;
     while (!WindowShouldClose())
@@ -153,12 +157,15 @@ int main()
         Matrix view = MatrixInvert(camera_rotation * MatrixTranslate(camera.position.x, camera.position.y, camera.position.z));
         Matrix world = MatrixIdentity();
         Matrix mvp = world * view * proj;
+        Vector3 light_position = Vector3UnitZ * 5.0f;
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         BeginShader(shaders[shader_index]);
         BeginTexture(textures[texture_index]);
+            SendVec3(light_position, "u_light_position");
+            SendMat4(world, "u_world");
             SendMat4(mvp, "u_mvp");
             DrawMesh(meshes[mesh_index]);
         EndTexture();
