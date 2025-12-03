@@ -103,7 +103,7 @@ int main()
     Vector3 light_position = Vector3UnitZ * 5.0f;
 
     int shader_index = SHADER_LIGHTING;
-    int mesh_index = MESH_PLANE;
+    int mesh_index = MESH_HEAD;
     int texture_index = TEXTURE_WHITE;
     while (!WindowShouldClose())
     {

@@ -16,19 +16,24 @@ void LoadMeshPlaneUnoptimal(Mesh* mesh);
 
 void LoadMeshObj(Mesh* mesh, const char* path)
 {
-    // Follow the same pattern for tcoords and normals if you didn't complete the obj-loader for assignment 3!
+    // Follow the same pattern for tcoords if you didn't complete the obj-loader for assignment 3!
 	fastObjMesh* obj = fast_obj_read(path);
 
     size_t vc = obj->index_count;
     mesh->vertex_count = vc;
     mesh->positions.resize(vc);
+    mesh->normals.resize(vc);
 
     Vector3* positions = (Vector3*)obj->positions;
+    Vector3* normals = (Vector3*)obj->normals;
     for (size_t i = 0; i < vc; i++)
     {
         fastObjUInt idx_v = obj->indices[i].p;
+        fastObjUInt idx_vn = obj->indices[i].n;
         Vector3 v = positions[idx_v];
+        Vector3 vn = normals[idx_vn];
         mesh->positions[i] = v;
+        mesh->normals[i] = vn;
     }
 
 	fast_obj_destroy(obj);
