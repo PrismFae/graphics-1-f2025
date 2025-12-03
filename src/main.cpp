@@ -35,6 +35,7 @@ enum MeshType
 enum TextureType
 {
     TEXTURE_CT4,
+    TEXTURE_WHITE,
     TEXTURE_GRADIENT_WARM,
     TEXTURE_GRADIENT_COOL,
     TEXTURE_TYPE_COUNT
@@ -42,15 +43,19 @@ enum TextureType
 
 void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
 {
-    Image ct4, warm, cool;
-    LoadImage(&ct4, "./assets/textures/ct4_orange.bmp");
+    Image ct4, white, warm, cool;
 
+    LoadImage(&ct4, "./assets/textures/ct4_orange.bmp");
+    LoadImage(&white, 1, 1);
     LoadImage(&warm, 512, 512);
     LoadImage(&cool, 512, 512);
+
+    white.pixels[0] = { 0xFF, 0xFF, 0xFF, 0xFF };
     LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
     LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
 
     LoadTexture(&textures[TEXTURE_CT4], ct4);
+    LoadTexture(&textures[TEXTURE_WHITE], white);
     LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
     LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
 }
@@ -99,7 +104,7 @@ int main()
 
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_PLANE;
-    int texture_index = TEXTURE_CT4;
+    int texture_index = TEXTURE_WHITE;
     while (!WindowShouldClose())
     {
         BeginFrame();
@@ -163,6 +168,7 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Render scene
         BeginShader(shaders[shader_index]);
         BeginTexture(textures[texture_index]);
             SendVec3(light_position, "u_light_position");
@@ -171,6 +177,16 @@ int main()
             DrawMesh(meshes[mesh_index]);
         EndTexture();
         EndShader();
+
+        // Render light
+        //BeginShader(shaders[shader_index]);
+        //BeginTexture(textures[texture_index]);
+        //SendVec3(light_position, "u_light_position");
+        //SendMat4(world, "u_world");
+        //SendMat4(mvp, "u_mvp");
+        //DrawMesh(meshes[mesh_index]);
+        //EndTexture();
+        //EndShader();
 
         BeginGui();
         ImGui::SliderFloat3("Light Position", &light_position.x, -10.0f, 10.0f);
