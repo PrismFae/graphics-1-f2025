@@ -33,6 +33,7 @@ enum MeshType
 
 enum TextureType
 {
+    TEXTURE_CT4,
     TEXTURE_GRADIENT_WARM,
     TEXTURE_GRADIENT_COOL,
     TEXTURE_TYPE_COUNT
@@ -40,12 +41,15 @@ enum TextureType
 
 void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
 {
-    Image warm, cool;
+    Image ct4, warm, cool;
+    LoadImage(&ct4, "./assets/textures/ct4_orange.bmp");
+
     LoadImage(&warm, 512, 512);
     LoadImage(&cool, 512, 512);
     LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
     LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
 
+    LoadTexture(&textures[TEXTURE_CT4], ct4);
     LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
     LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
 }
@@ -89,7 +93,7 @@ int main()
 
     int shader_index = SHADER_SAMPLE_TEXTURE;
     int mesh_index = MESH_PLANE;
-    int texture_index = TEXTURE_GRADIENT_COOL;
+    int texture_index = TEXTURE_CT4;
     while (!WindowShouldClose())
     {
         BeginFrame();

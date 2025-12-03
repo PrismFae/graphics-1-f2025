@@ -32,6 +32,7 @@ struct Texture
 };
 
 void LoadImage(Image* image, int width, int height);
+void LoadImage(Image* image, const char* filename);
 void UnloadImage(Image* image);
 
 void LoadImageGradient(Image* image, Vector3 uv_00/*bottom-left*/, Vector3 uv_10/*bottom-right*/, Vector3 uv_01/*top-left*/, Vector3 uv_11/*top-right*/);

@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include <cstdio>
 #include <cassert>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -15,6 +16,18 @@ void LoadImage(Image* image, int width, int height)
 	image->width = width;
 	image->height = height;
 	image->channels = 4;
+}
+
+void LoadImage(Image* image, const char* filename)
+{
+	stbi_uc* pixels = stbi_load(filename, &image->width, &image->height, &image->channels, 4);
+	if (image->channels != 4)
+		printf("INFO: Converted image %s from %i channels to 4 channels\n", filename, image->channels);
+	image->channels = 4;
+
+	image->pixels.resize(image->width * image->height);
+	memcpy(image->pixels.data(), pixels, image->pixels.size() * sizeof(Pixel));
+	stbi_image_free(pixels);
 }
 
 void UnloadImage(Image* image)
