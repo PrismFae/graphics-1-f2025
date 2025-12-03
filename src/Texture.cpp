@@ -102,7 +102,3 @@ void EndTexture()
 	glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	f_texture = GL_NONE;
 }
-
-// Extra practice:
-// Read all of https://learnopengl.com/Getting-started/Textures
-// Modify this program to interpolate between the warm and cool gradients based on a periodic function

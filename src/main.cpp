@@ -20,14 +20,6 @@ enum ShaderType
 
 enum MeshType
 {
-    // Platonic solids
-    //MESH_TETRAHEDRON,
-    //MESH_CUBE,
-    //MESH_OCTAHEDRON,
-    //MESH_DODECAHEDRON,
-    //MESH_ICOSAHEDRON,
-    // Removed platonic solids since they don't have texture coordinates
-
     // Parametric surfaces
     MESH_PLANE,
     MESH_SPHERE,
@@ -46,16 +38,6 @@ enum TextureType
     TEXTURE_TYPE_COUNT
 };
 
-enum A4DrawType
-{
-    A4_PAR_SHAPES_NORMAL_SHADER,
-    A4_OBJ_FILE_TCOORDS_SHADER,
-    A4_CT4_TEXTURE_SHADER,
-    A4_MANUAL_MESH,
-    A4_CUSTOM_DRAW,
-    A4_TYPE_COUNT
-};
-
 void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
 {
     Image warm, cool;
@@ -63,9 +45,6 @@ void LoadTextures(Texture textures[TEXTURE_TYPE_COUNT])
     LoadImage(&cool, 512, 512);
     LoadImageGradient(&warm, Vector3Zeros, Vector3UnitX, Vector3UnitY, Vector3UnitX + Vector3UnitY);
     LoadImageGradient(&cool, Vector3UnitZ, Vector3UnitZ + Vector3UnitX, Vector3UnitY + Vector3UnitZ, Vector3Ones);
-
-    // Uncomment to view gradient within the following file:
-    //SaveImage("./assets/textures/cool_gradient.png", cool);
 
     LoadTexture(&textures[TEXTURE_GRADIENT_WARM], warm);
     LoadTexture(&textures[TEXTURE_GRADIENT_COOL], cool);
@@ -83,13 +62,6 @@ int main()
     CreateWindow(800, 800, "Graphics 1");
 
     Mesh meshes[MESH_TYPE_COUNT];
-
-    //LoadMeshTetrahedron(&meshes[MESH_TETRAHEDRON]);
-    //LoadMeshCube(&meshes[MESH_CUBE]);
-    //LoadMeshOctahedron(&meshes[MESH_OCTAHEDRON]);
-    //LoadMeshDodecahedron(&meshes[MESH_DODECAHEDRON]);
-    //LoadMeshIcosahedron(&meshes[MESH_ICOSAHEDRON]);
-
     LoadMeshPlane(&meshes[MESH_PLANE]);
     LoadMeshSphere(&meshes[MESH_SPHERE]);
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
@@ -118,7 +90,6 @@ int main()
     int shader_index = SHADER_SAMPLE_TEXTURE;
     int mesh_index = MESH_PLANE;
     int texture_index = TEXTURE_GRADIENT_COOL;
-    int draw_index = A4_PAR_SHAPES_NORMAL_SHADER;
     while (!WindowShouldClose())
     {
         BeginFrame();
@@ -136,14 +107,9 @@ int main()
         if (IsKeyPressed(KEY_T))
             ++texture_index %= TEXTURE_TYPE_COUNT;
 
-        if (IsKeyPressed(KEY_Y))
-            ++draw_index %= A4_TYPE_COUNT;
-
         float tt = Time();
         float nsin = sinf(tt) * 0.5f + 0.5f;
 
-        // Below is test-rotation code. For full marks, you must rotate the camera with the mouse delta that should be implemented as follows:
-        // Extend Window.h & Window.cpp based on glfw documentation to track the change in mouse-position between frames, then make a function to return the mouse delta as a Vector2.
         if (IsKeyDown(KEY_1))
             camera.yaw -= 100.0f * dt * DEG2RAD;
         
@@ -179,8 +145,6 @@ int main()
         if (IsKeyDown(KEY_LEFT_SHIFT))
             camera.position -= camera_direction_y * 10.0f * dt;
 
-        // view-matrix is the inverse of the camera matrix
-        // camera-matrix is the translation & rotation about y & x of the camera
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
         Matrix view = MatrixInvert(camera_rotation * MatrixTranslate(camera.position.x, camera.position.y, camera.position.z));
         Matrix world = MatrixIdentity();
@@ -189,32 +153,12 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Example "mix-and-match" draw calls to understand Smiley's code
-        //BeginShader(shaders[shader_index]);
-        //BeginTexture(textures[texture_index]);
-        //    SendMat4(mvp, "u_mvp");
-        //    DrawMesh(meshes[mesh_index]);
-        //EndTexture();
-        //EndShader();
-        // (Replace with A4 draw types within the switch-case below):
-
-        switch (draw_index)
-        {
-        case A4_PAR_SHAPES_NORMAL_SHADER:
-            break;
-
-        case A4_OBJ_FILE_TCOORDS_SHADER:
-            break;
-
-        case A4_CT4_TEXTURE_SHADER:
-            break;
-
-        case A4_MANUAL_MESH:
-            break;
-
-        case A4_CUSTOM_DRAW:
-            break;
-        }
+        BeginShader(shaders[shader_index]);
+        BeginTexture(textures[texture_index]);
+            SendMat4(mvp, "u_mvp");
+            DrawMesh(meshes[mesh_index]);
+        EndTexture();
+        EndShader();
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
