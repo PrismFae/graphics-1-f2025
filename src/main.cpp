@@ -35,7 +35,7 @@ enum MeshType
 
     // Obj files
     MESH_HEAD,
-
+    MESH_CT4,
     MESH_TYPE_COUNT
 };
 
@@ -95,6 +95,7 @@ int main()
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
     LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
+	LoadMeshObj(&meshes[MESH_CT4], "./assets/meshes/ct4.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -200,21 +201,40 @@ int main()
 
         switch (draw_index)
         {
-        case A4_PAR_SHAPES_NORMAL_SHADER:
-            break;
+            case A4_PAR_SHAPES_NORMAL_SHADER:
+                BeginShader(shaders[SHADER_NORMAL_COLOR]);
+                SendMat4(mvp, "u_mvp");
+                DrawMesh(meshes[MESH_SPHERE]); // or MESH_HEMISPHERE / MESH_PLANE
+                EndShader();
+                break;
 
-        case A4_OBJ_FILE_TCOORDS_SHADER:
-            break;
+            case A4_OBJ_FILE_TCOORDS_SHADER:
+                BeginShader(shaders[SHADER_TCOORD_COLOR]);
+                SendMat4(mvp, "u_mvp");
+                DrawMesh(meshes[MESH_HEAD]);
+                EndShader();
+                break;
+                    
+            case A4_CT4_TEXTURE_SHADER:
+                BeginShader(shaders[SHADER_SAMPLE_TEXTURE]);
+                BeginTexture(textures[texture_index]);
+                SendMat4(mvp, "u_mvp");
+                DrawMesh(meshes[MESH_CT4]);
+                EndTexture();
+                EndShader();
+                break;
 
-        case A4_CT4_TEXTURE_SHADER:
-            break;
+            case A4_MANUAL_MESH:
+            {
+                break;
+            }
 
-        case A4_MANUAL_MESH:
-            break;
-
-        case A4_CUSTOM_DRAW:
-            break;
+            case A4_CUSTOM_DRAW:
+            {
+                break;
+            }
         }
+
 
         BeginGui();
         //ImGui::ShowDemoWindow(nullptr);
