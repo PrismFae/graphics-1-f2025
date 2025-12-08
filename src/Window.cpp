@@ -7,18 +7,26 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 #include "Window.h"
+#include "raymath.h"
 #include <cassert>
 #include <iostream>
 #include <memory>
 
 struct App
 {
-	GLFWwindow* window = nullptr;
+    GLFWwindow* window = nullptr;
     int keys_prev[KEY_COUNT]{};
     int keys_curr[KEY_COUNT]{};
     float frame_time_begin = 0.0f;
     float frame_time_end = 0.0f;
     float frame_time_delta = 0.0f;
+
+    // Mouse tracking
+    double mouse_x = 0.0;
+    double mouse_y = 0.0;
+    double mouse_dx = 0.0;
+    double mouse_dy = 0.0;
+    bool first_mouse = true; // prevents large jump at start
 } g_app;
 
 void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -226,4 +234,30 @@ int WindowHeight()
     int width, height;
     glfwGetWindowSize(g_app.window, &width, &height);
     return height;
+}
+
+// Resets every frame to get mouse delta
+static Vector2 g_prevMousePos = { 0.0f, 0.0f };
+static bool g_firstMouse = true;
+
+Vector2 GetMouseDelta()
+{
+    double xpos, ypos;
+    glfwGetCursorPos(g_app.window, &xpos, &ypos);
+
+    Vector2 delta = { 0.0f, 0.0f };
+	if (!g_firstMouse) // prevent large jump on first frame
+    {
+        delta.x = (float)(xpos - g_prevMousePos.x);
+        delta.y = (float)(ypos - g_prevMousePos.y);
+    }
+    else
+    {
+        g_firstMouse = false;
+    }
+
+    g_prevMousePos.x = (float)xpos;
+    g_prevMousePos.y = (float)ypos;
+
+    return delta;
 }

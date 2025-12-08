@@ -165,6 +165,14 @@ int main()
         Vector3 camera_direction_x = { camera_rotation.m0, camera_rotation.m1, camera_rotation.m2 };
         Vector3 camera_direction_y = { camera_rotation.m4, camera_rotation.m5, camera_rotation.m6 };
 
+        Vector2 mouseDelta = GetMouseDelta();
+    
+        float sensitivity = 0.002f;
+
+        camera.yaw += -mouseDelta.x * sensitivity; // horizontal
+        camera.pitch += -mouseDelta.y * sensitivity; // vertical
+
+
         if (IsKeyDown(KEY_W))
             camera.position -= camera_direction_z * 10.0f * dt;
         
