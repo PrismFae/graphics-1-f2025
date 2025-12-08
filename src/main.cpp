@@ -36,6 +36,7 @@ enum MeshType
     // Obj files
     MESH_HEAD,
     MESH_CT4,
+	MESH_SOFA,
     MESH_TYPE_COUNT
 };
 
@@ -96,6 +97,7 @@ int main()
 
     LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
 	LoadMeshObj(&meshes[MESH_CT4], "./assets/meshes/ct4.obj");
+	LoadMeshObj(&meshes[MESH_SOFA], "./assets/meshes/Sofa.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -105,6 +107,7 @@ int main()
     GLuint a4_texture_frag = CreateShader(GL_FRAGMENT_SHADER, "./assets/shaders/a4_texture.frag");
 
     GLuint shaders[SHADER_TYPE_COUNT];
+    shaders[SHADER_SAMPLE_TEXTURE] = CreateProgram(a4_texture_vert, a4_texture_frag);
     shaders[SHADER_SAMPLE_TEXTURE] = CreateProgram(a4_texture_vert, a4_texture_frag);
     shaders[SHADER_POSITION_COLOR] = CreateProgram(position_color_vert, vertex_color_frag);
     shaders[SHADER_TCOORD_COLOR] = CreateProgram(tcoord_color_vert, vertex_color_frag);
@@ -204,7 +207,7 @@ int main()
             case A4_PAR_SHAPES_NORMAL_SHADER:
                 BeginShader(shaders[SHADER_NORMAL_COLOR]);
                 SendMat4(mvp, "u_mvp");
-                DrawMesh(meshes[MESH_SPHERE]); // or MESH_HEMISPHERE / MESH_PLANE
+                DrawMesh(meshes[MESH_SPHERE]); 
                 EndShader();
                 break;
 
@@ -231,6 +234,10 @@ int main()
 
             case A4_CUSTOM_DRAW:
             {
+                BeginShader(shaders[SHADER_NORMAL_COLOR]);
+                SendMat4(mvp, "u_mvp");
+                DrawMesh(meshes[MESH_SOFA]);
+                EndShader();
                 break;
             }
         }
