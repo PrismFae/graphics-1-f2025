@@ -1,5 +1,7 @@
 #pragma once
 
+class Vector2;
+
 void CreateWindow(int width, int height, const char* title);
 void DestroyWindow();
 
@@ -22,6 +24,8 @@ void EndGui();
 bool IsKeyDown(int key);		// If a key is heald
 bool IsKeyUp(int key);			// If a key is released
 bool IsKeyPressed(int key);		// If a key is pressed (down then up)
+
+Vector2 GetMouseDelta();
 
 #define MOUSE_BUTTON_1         0
 #define MOUSE_BUTTON_2         1
