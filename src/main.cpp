@@ -80,7 +80,7 @@ int main()
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
     LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
-	LoadMeshObj(&meshes[MESH_SOFA], "./assets/meshes/sofa.obj");
+	LoadMeshObj(&meshes[MESH_SOFA], "./assets/meshes/Sofa.obj");
     
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
@@ -183,12 +183,15 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Render plane
-        Matrix world_plane = MatrixTranslate(0.0f, -1.0f, 0.0f) * MatrixScale(5.0f, 1.0f, 5.0f);
+        Matrix world_plane =
+			MatrixTranslate(0.0f, 0.f, -.01f) *     // Places under the sofa
+            MatrixRotateX(-90.0f * DEG2RAD) *        // Plane lies flat
+            MatrixScale(10.0f, 50.0f, 10.0f);         
+
         Matrix mvp_plane = world_plane * view * proj;
 
         BeginShader(shaders[SHADER_FLAT]);
-            SendVec3(Vector3{ 0.5f, 0.5f, 0.5f }, "u_color"); // grey 
+            SendVec3(Vector3{ 0.5f, 0.5f, 0.5f }, "u_color"); 
             SendMat4(mvp_plane, "u_mvp");
             DrawMesh(meshes[MESH_PLANE]);
         EndShader();
