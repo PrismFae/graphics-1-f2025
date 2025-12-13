@@ -121,6 +121,11 @@ int main()
     Vector3 spotColour = Vector3{ .0f, 1.0f, .0f }; // Green for spotlight
     float spotCutoff = 0.9f; // cosine of cone angle 
 
+    // Rotating Light
+    float radius = 10.0f;
+    float height = 5.0f; // y-axis height above ground
+    Vector3 rotatingLightColor = Vector3{ 0.f, 0.f, 1.0f }; // Blue Light
+
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_SOFA;
     int texture_index = TEXTURE_WHITE;
@@ -144,6 +149,14 @@ int main()
 
         float tt = Time();
         float nsin = sinf(tt) * 0.5f + 0.5f;
+
+        // Rotation of 
+        Vector3 rotatingLightPos = {
+            cosf(tt) * radius,  // x
+            height,             // y
+            sinf(tt) * radius   // z
+        };
+        
 
         // Camera movement
         if (IsKeyDown(KEY_1)) camera.yaw -= 100.0f * dt * DEG2RAD;
@@ -212,6 +225,10 @@ int main()
                 SendVec3(spotColour, "u_spot_color");
                 SendFloat(spotCutoff, "u_spot_cutoff");
 
+                // Rotating Light
+                SendVec3(rotatingLightPos, "u_rotating_point_light_position");
+                SendVec3(rotatingLightColor, "u_rotating_point_light_color");
+
                 SendVec3(camera.position, "u_view_position");
                 SendMat4(world, "u_world");
                 SendMat4(mvp, "u_mvp");
@@ -249,6 +266,17 @@ int main()
             SendVec3(spotColour, "u_color");
             SendMat4(mvpSpot, "u_mvp");
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+                DrawMesh(meshes[MESH_SPHERE]);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        EndShader();
+
+        Matrix worldLightSphere = MatrixTranslate(rotatingLightPos.x, rotatingLightPos.y, rotatingLightPos.z);
+        Matrix mvpLightSphere = worldLightSphere * view * proj;
+
+        BeginShader(shaders[SHADER_FLAT]);
+            SendVec3(rotatingLightColor, "u_color");
+            SendMat4(mvpLightSphere, "u_mvp");
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 DrawMesh(meshes[MESH_SPHERE]);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         EndShader();

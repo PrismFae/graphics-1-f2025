@@ -19,7 +19,11 @@ uniform vec3 u_dir_light_color;
 uniform vec3 u_spot_position;
 uniform vec3 u_spot_direction;
 uniform vec3 u_spot_color;
-uniform float u_spot_cutoff = 0.9; // focuses the light to act as a spotlight
+uniform float u_spot_cutoff = 0.9; // focuses the light to act as a spotlight       
+
+// rotating point light
+uniform vec3 u_rotating_point_light_position;
+uniform vec3 u_rotating_point_light_color;
 
 uniform float u_ambient_strength = 0.1;
 uniform float u_specular_strength = 0.3;
@@ -60,10 +64,21 @@ void main()
     vec3 diffuseS = diffS * u_spot_color;
     vec3 specularS = specS * u_specular_strength * u_spot_color;
 
+    // Animated Point Light
+    vec3 Lap = normalize(u_rotating_point_light_position - frag_position);
+    float diffAP = max(dot(N, Lap), 0.0);
+    vec3 Rap = reflect(-Lap, N);
+    float specAP = pow(max(dot(V, Rap), 0.0), u_shininess);
+    vec3 ambientAP = u_ambient_strength * u_rotating_point_light_color;
+    vec3 diffuseAP = diffAP * u_rotating_point_light_color;
+    vec3 specularAP = specAP * u_specular_strength * u_rotating_point_light_color;
+
     // Combine lights
     vec3 lighting = (ambientP + diffuseP + specularP) +
                     (ambientD + diffuseD + specularD) +
-                    (ambientS + diffuseS + specularS);
+                    (ambientS + diffuseS + specularS) +
+                    (ambientAP + diffuseAP + specularAP);
+
 
     fragColor = vec4(tex_col * lighting, 1.0);
 }
