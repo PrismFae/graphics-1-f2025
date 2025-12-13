@@ -9,7 +9,6 @@
 #include <cstdio>
 #include <ctime>
 
-
 enum ShaderType
 {
     SHADER_LIGHTING,
@@ -35,7 +34,7 @@ enum MeshType
     MESH_TYPE_COUNT
 };
 
-enum TextureType    
+enum TextureType
 {
     TEXTURE_CT4,
     TEXTURE_WHITE,
@@ -80,8 +79,8 @@ int main()
     LoadMeshHemisphere(&meshes[MESH_HEMISPHERE]);
 
     LoadMeshObj(&meshes[MESH_HEAD], "./assets/meshes/head.obj");
-	LoadMeshObj(&meshes[MESH_SOFA], "./assets/meshes/Sofa.obj");
-    
+    LoadMeshObj(&meshes[MESH_SOFA], "./assets/meshes/Sofa.obj");
+
     GLuint position_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/position_color.vert");
     GLuint tcoord_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/tcoord_color.vert");
     GLuint normal_color_vert = CreateShader(GL_VERTEX_SHADER, "./assets/shaders/normal_color.vert");
@@ -107,12 +106,20 @@ int main()
     Camera camera;
     camera.position = { 0.0f, 0.0f, 5.0f };
 
+    // === Lights ===
+    // Point light
     Vector3 light_position = Vector3UnitZ * 5.0f;
     Vector3 light_color = Vector3Ones;
+
+    // Directional light
+    Vector3 directionLight = Vector3Normalize(Vector3{ -1.0f, -2.0f, 0.f }); // direction
+    Vector3 dirLightColor = Vector3{ 1.0f, 1.0f, 0.0f }; // Yellow lighting for directional
+    Vector3 dirLightVisualPos = Vector3Scale(directionLight, -5.0f); // position for sphere
 
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_SOFA;
     int texture_index = TEXTURE_WHITE;
+
     while (!WindowShouldClose())
     {
         BeginFrame();
@@ -133,17 +140,11 @@ int main()
         float tt = Time();
         float nsin = sinf(tt) * 0.5f + 0.5f;
 
-        if (IsKeyDown(KEY_1))
-            camera.yaw -= 100.0f * dt * DEG2RAD;
-        
-        if (IsKeyDown(KEY_2))
-            camera.yaw += 100.0f * dt * DEG2RAD;
-        
-        if (IsKeyDown(KEY_3))
-            camera.pitch -= 100.0f * dt * DEG2RAD;
-        
-        if (IsKeyDown(KEY_4))
-            camera.pitch += 100.0f * dt * DEG2RAD;
+        // Camera movement
+        if (IsKeyDown(KEY_1)) camera.yaw -= 100.0f * dt * DEG2RAD;
+        if (IsKeyDown(KEY_2)) camera.yaw += 100.0f * dt * DEG2RAD;
+        if (IsKeyDown(KEY_3)) camera.pitch -= 100.0f * dt * DEG2RAD;
+        if (IsKeyDown(KEY_4)) camera.pitch += 100.0f * dt * DEG2RAD;
 
         Matrix camera_rotation = MatrixRotateY(camera.yaw) * MatrixRotateX(camera.pitch);
         Vector3 camera_direction_z = { camera_rotation.m8, camera_rotation.m9, camera_rotation.m10 };
@@ -151,28 +152,21 @@ int main()
         Vector3 camera_direction_y = { camera_rotation.m4, camera_rotation.m5, camera_rotation.m6 };
 
         Vector2 mouseDelta = GetMouseDelta();
-
         float sensitivity = 0.002f;
+        camera.yaw += -mouseDelta.x * sensitivity;
+        camera.pitch += -mouseDelta.y * sensitivity;
 
-        camera.yaw += -mouseDelta.x * sensitivity; // horizontal
-        camera.pitch += -mouseDelta.y * sensitivity; // vertical
-
-        if (IsKeyDown(KEY_W))
+        if (IsKeyDown(KEY_W)) 
             camera.position -= camera_direction_z * 10.0f * dt;
-        
         if (IsKeyDown(KEY_S))
             camera.position += camera_direction_z * 10.0f * dt;
-        
         if (IsKeyDown(KEY_D))
             camera.position += camera_direction_x * 10.0f * dt;
-        
         if (IsKeyDown(KEY_A))
             camera.position -= camera_direction_x * 10.0f * dt;
-         
-        if (IsKeyDown(KEY_SPACE))
+        if (IsKeyDown(KEY_SPACE)) 
             camera.position += camera_direction_y * 10.0f * dt;
-        
-        if (IsKeyDown(KEY_LEFT_SHIFT))
+        if (IsKeyDown(KEY_LEFT_SHIFT)) 
             camera.position -= camera_direction_y * 10.0f * dt;
 
         Matrix proj = MatrixPerspective(75.0f * DEG2RAD, WindowWidth() / (float)WindowHeight(), 0.01f, 100.0f);
@@ -183,25 +177,27 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // plane
         Matrix world_plane =
-			MatrixTranslate(0.0f, 0.f, -.01f) *     // Places under the sofa
-            MatrixRotateX(-90.0f * DEG2RAD) *        // Plane lies flat
-            MatrixScale(10.0f, 50.0f, 10.0f);         
-
+            MatrixTranslate(0.0f, 0.f, -.01f) * // Moves plane vertically down
+            MatrixRotateX(-90.0f * DEG2RAD) * // Aligns it horizontally
+            MatrixScale(10.0f, 50.0f, 10.0f);
         Matrix mvp_plane = world_plane * view * proj;
 
         BeginShader(shaders[SHADER_FLAT]);
-            SendVec3(Vector3{ 0.5f, 0.5f, 0.5f }, "u_color"); 
+            SendVec3(Vector3{ 0.5f, 0.5f, 0.5f }, "u_color");
             SendMat4(mvp_plane, "u_mvp");
             DrawMesh(meshes[MESH_PLANE]);
         EndShader();
-        
 
         // Render scene
         BeginTexture(textures[texture_index]);
             BeginShader(shaders[shader_index]);
                 SendVec3(light_position, "u_light_position");
                 SendVec3(light_color, "u_light_color");
+                SendVec3(directionLight, "u_dir_light_direction");
+                SendVec3(dirLightColor, "u_dir_light_color");
+                SendVec3(camera.position, "u_view_position");
                 SendMat4(world, "u_world");
                 SendMat4(mvp, "u_mvp");
                 DrawMesh(meshes[mesh_index]);
@@ -219,16 +215,27 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         EndShader();
 
+        // Sphere for direction light
+        world = MatrixTranslate(dirLightVisualPos.x, dirLightVisualPos.y, dirLightVisualPos.z);
+        mvp = world * view * proj;
+        BeginShader(shaders[SHADER_FLAT]);
+            SendVec3(dirLightColor, "u_color");
+            SendMat4(mvp, "u_mvp");
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                DrawMesh(meshes[MESH_SPHERE]);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        EndShader();
+
         BeginGui();
-        ImGui::SliderFloat3("Light Position", &light_position.x, -10.0f, 10.0f);
-        ImGui::ColorPicker3("Light Color", &light_color.x);
-        //ImGui::ShowDemoWindow(nullptr);
+        ImGui::SliderFloat3("Point Light Position", &light_position.x, -10.0f, 10.0f);
+        ImGui::ColorPicker3("Point Light Color", &light_color.x);
         EndGui();
 
         Loop();
         EndFrame();
     }
 
+    // Cleanup
     DestroyShader(&position_color_vert);
     DestroyShader(&tcoord_color_vert);
     DestroyShader(&normal_color_vert);
@@ -236,10 +243,8 @@ int main()
 
     for (int i = 0; i < TEXTURE_TYPE_COUNT; i++)
         UnloadTexture(&textures[i]);
-
     for (int i = 0; i < SHADER_TYPE_COUNT; i++)
         DestroyProgram(&shaders[i]);
-
     for (int i = 0; i < MESH_TYPE_COUNT; i++)
         UnloadMesh(&meshes[i]);
 

@@ -7,21 +7,48 @@ in vec2 uv;
 
 uniform vec3 u_light_position;
 uniform vec3 u_light_color;
+
+uniform vec3 u_view_position;
 uniform sampler2D u_sampler0;
+
+// directional light
+uniform vec3 u_dir_light_direction;  // Direction *toward* the light (e.g. (-1, -1, -1))
+uniform vec3 u_dir_light_color;
+
+uniform float u_ambient_strength = 0.1;
+uniform float u_specular_strength = 0.3;
+uniform float u_shininess = 32.0;
 
 void main()
 {
-    vec3 tex_col = texture(u_sampler0, uv).xyz;
+    vec3 tex_col = texture(u_sampler0, uv).rgb;
 
-    // FROM fragment TO light (AB = B - A)
-    vec3 L = normalize(u_light_position - frag_position);
+    // Normalize once
     vec3 N = normalize(frag_normal);
-    float dotNL = max(dot(N, L), 0.0);
+    vec3 V = normalize(u_view_position - frag_position);
 
-    vec3 ambient = u_light_color * 0.0; // TODO -- control ambient strength with a uniform!
-    vec3 diffuse = u_light_color * dotNL;
-    vec3 specular = u_light_color * 0.0; // TODO -- add the formula (dotVR) for specular!
-    vec3 lighting = ambient + diffuse + specular;
+    // Point
+    vec3 Lp = normalize(u_light_position - frag_position);
+    float diffP = max(dot(N, Lp), 0.0);
+    vec3 Rp = reflect(-Lp, N);
+    float specP = pow(max(dot(V, Rp), 0.0), u_shininess);
+    vec3 ambientP = u_ambient_strength * u_light_color;
+    vec3 diffuseP = diffP * u_light_color;
+    vec3 specularP = specP * u_specular_strength * u_light_color;
+
+    // Directional
+    // Light comes *from* -u_dir_light_direction
+    vec3 Ld = normalize(-u_dir_light_direction);
+    float diffD = max(dot(N, Ld), 0.0);
+    vec3 Rd = reflect(-Ld, N);
+    float specD = pow(max(dot(V, Rd), 0.0), u_shininess);
+    vec3 ambientD = u_ambient_strength * u_dir_light_color;
+    vec3 diffuseD = diffD * u_dir_light_color;
+    vec3 specularD = specD * u_specular_strength * u_dir_light_color;
+
+    // Combine lights
+    vec3 lighting = (ambientP + diffuseP + specularP) +
+                    (ambientD + diffuseD + specularD);
 
     fragColor = vec4(tex_col * lighting, 1.0);
 }
