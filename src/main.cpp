@@ -106,15 +106,20 @@ int main()
     Camera camera;
     camera.position = { 0.0f, 0.0f, 5.0f };
 
-    // === Lights ===
     // Point light
     Vector3 light_position = Vector3UnitZ * 5.0f;
     Vector3 light_color = Vector3Ones;
 
     // Directional light
-    Vector3 directionLight = Vector3Normalize(Vector3{ -1.0f, -2.0f, 0.f }); // direction
+    Vector3 directionLight = Vector3{ -1.0f, -1.0f, 1.f }; // direction
     Vector3 dirLightColor = Vector3{ 1.0f, 1.0f, 0.0f }; // Yellow lighting for directional
     Vector3 dirLightVisualPos = Vector3Scale(directionLight, -5.0f); // position for sphere
+
+    // Spotlight
+    Vector3 spotPosition = { 0.0f, 5.0f, 0.0f };  // 5 units above mesh
+    Vector3 spotDirection = { 0.0f, -1.0f, 0.0f }; // pointing down
+    Vector3 spotColour = Vector3{ .0f, 1.0f, .0f }; // Green for spotlight
+    float spotCutoff = 0.9f; // cosine of cone angle 
 
     int shader_index = SHADER_LIGHTING;
     int mesh_index = MESH_SOFA;
@@ -193,10 +198,20 @@ int main()
         // Render scene
         BeginTexture(textures[texture_index]);
             BeginShader(shaders[shader_index]);
+                // Starter Light
                 SendVec3(light_position, "u_light_position");
                 SendVec3(light_color, "u_light_color");
+
+                // Directional lighting
                 SendVec3(directionLight, "u_dir_light_direction");
                 SendVec3(dirLightColor, "u_dir_light_color");
+
+                // Spot light
+                SendVec3(spotPosition, "u_spot_position");
+                SendVec3(spotDirection, "u_spot_direction");
+                SendVec3(spotColour, "u_spot_color");
+                SendFloat(spotCutoff, "u_spot_cutoff");
+
                 SendVec3(camera.position, "u_view_position");
                 SendMat4(world, "u_world");
                 SendMat4(mvp, "u_mvp");
@@ -222,6 +237,18 @@ int main()
             SendVec3(dirLightColor, "u_color");
             SendMat4(mvp, "u_mvp");
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                DrawMesh(meshes[MESH_SPHERE]);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        EndShader();
+
+        // Sphere for spotlight
+        Matrix worldSpot = MatrixTranslate(spotPosition.x, spotPosition.y, spotPosition.z);
+        Matrix mvpSpot = worldSpot * view * proj;
+
+        BeginShader(shaders[SHADER_FLAT]);
+            SendVec3(spotColour, "u_color");
+            SendMat4(mvpSpot, "u_mvp");
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
                 DrawMesh(meshes[MESH_SPHERE]);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         EndShader();

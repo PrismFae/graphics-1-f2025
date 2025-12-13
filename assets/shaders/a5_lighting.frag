@@ -12,8 +12,14 @@ uniform vec3 u_view_position;
 uniform sampler2D u_sampler0;
 
 // directional light
-uniform vec3 u_dir_light_direction;  // Direction *toward* the light (e.g. (-1, -1, -1))
+uniform vec3 u_dir_light_direction;
 uniform vec3 u_dir_light_color;
+
+// spotlight
+uniform vec3 u_spot_position;
+uniform vec3 u_spot_direction;
+uniform vec3 u_spot_color;
+uniform float u_spot_cutoff = 0.9; // focuses the light to act as a spotlight
 
 uniform float u_ambient_strength = 0.1;
 uniform float u_specular_strength = 0.3;
@@ -23,11 +29,10 @@ void main()
 {
     vec3 tex_col = texture(u_sampler0, uv).rgb;
 
-    // Normalize once
     vec3 N = normalize(frag_normal);
     vec3 V = normalize(u_view_position - frag_position);
 
-    // Point
+    // Point light
     vec3 Lp = normalize(u_light_position - frag_position);
     float diffP = max(dot(N, Lp), 0.0);
     vec3 Rp = reflect(-Lp, N);
@@ -36,8 +41,7 @@ void main()
     vec3 diffuseP = diffP * u_light_color;
     vec3 specularP = specP * u_specular_strength * u_light_color;
 
-    // Directional
-    // Light comes *from* -u_dir_light_direction
+    // Directional light
     vec3 Ld = normalize(-u_dir_light_direction);
     float diffD = max(dot(N, Ld), 0.0);
     vec3 Rd = reflect(-Ld, N);
@@ -46,9 +50,20 @@ void main()
     vec3 diffuseD = diffD * u_dir_light_color;
     vec3 specularD = specD * u_specular_strength * u_dir_light_color;
 
+    // Spotlight
+    vec3 Ls = normalize(u_spot_position - frag_position);
+    float theta = dot(normalize(-u_spot_direction), Ls);
+    float diffS = max(dot(N, Ls), 0.0) * step(u_spot_cutoff, theta); // inside cone
+    vec3 Rs = reflect(-Ls, N);
+    float specS = pow(max(dot(V, Rs), 0.0), u_shininess) * step(u_spot_cutoff, theta);
+    vec3 ambientS = u_ambient_strength * u_spot_color;
+    vec3 diffuseS = diffS * u_spot_color;
+    vec3 specularS = specS * u_specular_strength * u_spot_color;
+
     // Combine lights
     vec3 lighting = (ambientP + diffuseP + specularP) +
-                    (ambientD + diffuseD + specularD);
+                    (ambientD + diffuseD + specularD) +
+                    (ambientS + diffuseS + specularS);
 
     fragColor = vec4(tex_col * lighting, 1.0);
 }
